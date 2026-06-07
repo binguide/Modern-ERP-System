@@ -1,0 +1,86 @@
+{
+  "app": {
+    "name": "نظام ERP الحديث",
+    "shortName": "ERP"
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "loading": "جاري التحميل...",
+    "backHome": "العودة للرئيسية",
+    "actions": "إجراءات",
+    "confirm": "تأكيد",
+    "yes": "نعم",
+    "no": "لا",
+    "guest": "زائر",
+    "welcome": "مرحباً"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "loginSuccess": "تم تسجيل الدخول بنجاح",
+    "loginFailed": "فشل تسجيل الدخول. تحقق من البيانات",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "changePassword": "تغيير كلمة المرور",
+    "oldPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmPassword": "تأكيد كلمة المرور"
+  },
+  "menu": {
+    "dashboard": "لوحة التحكم",
+    "users": "المستخدمون",
+    "roles": "الأدوار",
+    "branches": "الفروع",
+    "auditLogs": "سجل التدقيق",
+    "settings": "الإعدادات",
+    "profile": "الملف الشخصي"
+  },
+  "dashboard": {
+    "welcome": "مرحباً، {{name}}",
+    "subtitle": "نظرة سريعة على نشاطك",
+    "totalSales": "إجمالي المبيعات",
+    "totalOrders": "إجمالي الطلبات",
+    "totalCustomers": "إجمالي العملاء",
+    "totalInvoices": "إجمالي الفواتير"
+  },
+  "user": {
+    "profile": "الملف الشخصي",
+    "fullName": "الاسم الكامل",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "phone": "الهاتف",
+    "isActive": "نشط",
+    "lastLogin": "آخر تسجيل دخول",
+    "createUser": "إنشاء مستخدم",
+    "editUser": "تعديل المستخدم"
+  },
+  "role": {
+    "code": "الرمز",
+    "name": "الاسم",
+    "description": "الوصف",
+    "permissions": "الصلاحيات",
+    "isSystem": "دور نظام",
+    "createRole": "إنشاء دور",
+    "editRole": "تعديل الدور"
+  },
+  "validation": {
+    "required": "{{field}} مطلوب",
+    "email": "بريد إلكتروني غير صالح",
+    "minLength": "الحد الأدنى {{min}} حرف",
+    "maxLength": "الحد الأقصى {{max}} حرف",
+    "passwordsMismatch": "كلمات المرور غير متطابقة"
+  },
+  "errors": {
+    "notFound": "الصفحة غير موجودة",
+    "unauthorized": "غير مصرح لك",
+    "forbidden": "ممنوع",
+    "serverError": "خطأ في الخادم",
+    "networkError": "خطأ في الشبكة"
+  }
+}

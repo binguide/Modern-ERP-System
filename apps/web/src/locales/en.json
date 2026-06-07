@@ -1,0 +1,86 @@
+{
+  "app": {
+    "name": "Modern ERP System",
+    "shortName": "ERP"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "loading": "Loading...",
+    "backHome": "Back to home",
+    "actions": "Actions",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "guest": "Guest",
+    "welcome": "Welcome"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "loginSuccess": "Login successful",
+    "loginFailed": "Login failed. Check your credentials",
+    "forgotPassword": "Forgot password?",
+    "changePassword": "Change password",
+    "oldPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password"
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "roles": "Roles",
+    "branches": "Branches",
+    "auditLogs": "Audit Logs",
+    "settings": "Settings",
+    "profile": "Profile"
+  },
+  "dashboard": {
+    "welcome": "Welcome, {{name}}",
+    "subtitle": "A quick overview of your activity",
+    "totalSales": "Total Sales",
+    "totalOrders": "Total Orders",
+    "totalCustomers": "Total Customers",
+    "totalInvoices": "Total Invoices"
+  },
+  "user": {
+    "profile": "Profile",
+    "fullName": "Full Name",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phone": "Phone",
+    "isActive": "Active",
+    "lastLogin": "Last Login",
+    "createUser": "Create User",
+    "editUser": "Edit User"
+  },
+  "role": {
+    "code": "Code",
+    "name": "Name",
+    "description": "Description",
+    "permissions": "Permissions",
+    "isSystem": "System Role",
+    "createRole": "Create Role",
+    "editRole": "Edit Role"
+  },
+  "validation": {
+    "required": "{{field}} is required",
+    "email": "Invalid email",
+    "minLength": "Minimum {{min}} characters",
+    "maxLength": "Maximum {{max}} characters",
+    "passwordsMismatch": "Passwords do not match"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "serverError": "Server error",
+    "networkError": "Network error"
+  }
+}
