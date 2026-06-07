@@ -5,6 +5,7 @@ This document outlines the strategic plan for the Modern ERP System, organized i
 ## 🎯 Vision
 
 A multi-tenant, modular ERP system supporting:
+
 - **Sales & POS** — Quotations, orders, invoices, point-of-sale
 - **Inventory** — Multi-warehouse stock, batch/serial tracking, transfers
 - **Purchasing** — Purchase requests, orders, goods receipts, invoices
@@ -22,6 +23,7 @@ A multi-tenant, modular ERP system supporting:
 **Status:** 🚧 In Progress
 
 **Deliverables:**
+
 - ✅ Monorepo setup (pnpm + Turborepo)
 - ✅ TypeScript strict mode
 - ✅ Backend skeleton (NestJS 10 + TypeORM)
@@ -39,6 +41,7 @@ A multi-tenant, modular ERP system supporting:
 **Status:** 📋 Planned
 
 **Deliverables:**
+
 - [ ] Database schema: `companies`, `branches`, `fiscal_years`, `periods`
 - [ ] Database schema: `users`, `roles`, `user_roles`, `role_permissions`
 - [ ] Database schema: `audit_logs`
@@ -52,6 +55,7 @@ A multi-tenant, modular ERP system supporting:
 - [ ] **Frontend**: Sidebar respects permissions
 
 **Definition of Done:**
+
 - ✅ Login as `admin/admin` works
 - ✅ Create user, assign role, see only what they have permission for
 - ✅ Audit log captures all changes
@@ -64,6 +68,7 @@ A multi-tenant, modular ERP system supporting:
 **Status:** 🔜 Future
 
 **Deliverables:**
+
 - [ ] Schema: `accounts` (tree), `journals`, `journal_lines`
 - [ ] Schema: `cost_centers`, `projects`, `budgets`
 - [ ] Schema: `currencies` (with exchange rates history)
@@ -76,6 +81,7 @@ A multi-tenant, modular ERP system supporting:
 - [ ] **Posting Rules Engine**
 
 **Definition of Done:**
+
 - ✅ Post a journal entry manually
 - ✅ Trial balance balances to zero
 - ✅ All three financial statements generate correctly
@@ -87,6 +93,7 @@ A multi-tenant, modular ERP system supporting:
 **Status:** 🔜 Future
 
 **Deliverables:**
+
 - [ ] Schema: `uom_categories`, `uoms`, `items`, `item_units`
 - [ ] Schema: `item_categories`, `warehouses`, `stock_balances`, `stock_transactions`
 - [ ] Schema: `batches`, `serials`
@@ -97,6 +104,7 @@ A multi-tenant, modular ERP system supporting:
 - [ ] **Reports**: Stock Ledger, Inventory Valuation, Reorder Alerts
 
 **Definition of Done:**
+
 - ✅ Create item with multiple UoMs and conversion factors
 - ✅ Stock movements create immutable transactions log
 - ✅ Multi-warehouse stock balances correct
@@ -108,6 +116,7 @@ A multi-tenant, modular ERP system supporting:
 **Status:** 🔜 Future
 
 **Deliverables:**
+
 - [ ] Schema: `customers`, `price_lists`, `price_list_lines`
 - [ ] Schema: `quotations`, `quotation_lines`, `quotation_versions`
 - [ ] Schema: `quotation_terms`, `quotation_activities`
@@ -123,6 +132,7 @@ A multi-tenant, modular ERP system supporting:
 - [ ] **Multi-currency**: freeze exchange rate at send time
 
 **Definition of Done:**
+
 - ✅ Create quotation, send, accept → auto-creates SO 1:1
 - ✅ Reject + revise creates new version snapshot
 - ✅ Multi-currency works with locked rates
@@ -134,6 +144,7 @@ A multi-tenant, modular ERP system supporting:
 **Status:** 🔜 Future
 
 **Deliverables:**
+
 - [ ] Schema: `suppliers`, `purchase_requests`, `purchase_orders`, `po_lines`
 - [ ] Schema: `purchase_receipts`, `receipt_lines`, `purchase_invoices`
 - [ ] Schema: `landed_costs`
@@ -145,6 +156,7 @@ A multi-tenant, modular ERP system supporting:
 - [ ] **Module**: Depreciation (Straight-line + Declining balance)
 
 **Definition of Done:**
+
 - ✅ Full purchase cycle from PR to Invoice
 - ✅ Depreciation schedule generates correctly
 - ✅ Asset disposal creates gain/loss journal
@@ -156,6 +168,7 @@ A multi-tenant, modular ERP system supporting:
 **Status:** 🔜 Future
 
 **Deliverables:**
+
 - [ ] Schema: `pos_terminals`, `pos_sessions`, `pos_transactions`, `pos_trans_lines`
 - [ ] **Module**: POS Terminal Setup
 - [ ] **Module**: POS Session Management (open/close, cash drawer)
@@ -164,6 +177,7 @@ A multi-tenant, modular ERP system supporting:
 - [ ] **Module**: Held Sales / Resume
 
 **Definition of Done:**
+
 - ✅ Open session, perform sales, close session with expected vs actual cash
 - ✅ Receipt prints correctly
 - ✅ Held sales resume correctly
@@ -175,6 +189,7 @@ A multi-tenant, modular ERP system supporting:
 **Status:** 🔜 Future
 
 **Deliverables:**
+
 - [ ] Reports: Aged Receivables/Payables
 - [ ] Reports: Customer/Product Profitability
 - [ ] Reports: ABC Analysis
@@ -190,6 +205,7 @@ A multi-tenant, modular ERP system supporting:
 **Status:** 🔜 Future
 
 **Deliverables:**
+
 - [ ] **State Machine Engine** (generic, configurable via UI)
 - [ ] **Email Notifications** (Nodemailer + templates)
 - [ ] **File Uploads** (S3-compatible)
@@ -203,16 +219,16 @@ A multi-tenant, modular ERP system supporting:
 
 ## 📊 Milestones
 
-| Milestone | Sprint | Status |
-|---|---|---|
-| **M1: Foundation Ready** | Sprint 0 | 🚧 In Progress |
-| **M2: Login Works + Permissions Enforced** | Sprint 1 | 📋 Planned |
-| **M3: Full Accounting Cycle** | Sprint 2 | 📋 Planned |
-| **M4: Inventory Tracked** | Sprint 3 | 📋 Planned |
-| **M5: Sales Flow Complete** | Sprint 4 | 📋 Planned |
-| **M6: Purchasing + Assets** | Sprint 5 | 📋 Planned |
-| **M7: POS Production-Ready** | Sprint 6 | 📋 Planned |
-| **M8: ERP Feature-Complete** | Sprint 8 | 🔮 Future |
+| Milestone                                  | Sprint   | Status         |
+| ------------------------------------------ | -------- | -------------- |
+| **M1: Foundation Ready**                   | Sprint 0 | 🚧 In Progress |
+| **M2: Login Works + Permissions Enforced** | Sprint 1 | 📋 Planned     |
+| **M3: Full Accounting Cycle**              | Sprint 2 | 📋 Planned     |
+| **M4: Inventory Tracked**                  | Sprint 3 | 📋 Planned     |
+| **M5: Sales Flow Complete**                | Sprint 4 | 📋 Planned     |
+| **M6: Purchasing + Assets**                | Sprint 5 | 📋 Planned     |
+| **M7: POS Production-Ready**               | Sprint 6 | 📋 Planned     |
+| **M8: ERP Feature-Complete**               | Sprint 8 | 🔮 Future      |
 
 ---
 

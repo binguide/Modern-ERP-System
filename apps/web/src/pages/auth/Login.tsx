@@ -22,7 +22,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm<LoginFormValues>();
 
-  const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/dashboard';
+  const from =
+    (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/dashboard';
 
   const onFinish = async (values: LoginFormValues) => {
     setLoading(true);
@@ -79,7 +80,12 @@ export default function LoginPage() {
               <Form.Item
                 name="password"
                 label={t('auth.password')}
-                rules={[{ required: true, message: t('validation.required', { field: t('auth.password') }) }]}
+                rules={[
+                  {
+                    required: true,
+                    message: t('validation.required', { field: t('auth.password') }),
+                  },
+                ]}
               >
                 <Input.Password prefix={<LockOutlined />} placeholder="••••••••" size="large" />
               </Form.Item>

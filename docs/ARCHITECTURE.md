@@ -16,6 +16,7 @@ This document describes the technical architecture of the Modern ERP System.
 ## 🛠️ Tech Stack
 
 ### Frontend (`apps/web`)
+
 - **React 18** — UI library
 - **Vite 5** — Build tool, dev server
 - **TypeScript 5** (strict) — Type safety
@@ -32,6 +33,7 @@ This document describes the technical architecture of the Modern ERP System.
 - **Axios 1** — HTTP client
 
 ### Backend (`apps/api`)
+
 - **NestJS 10** — Framework
 - **TypeScript 5** (strict)
 - **TypeORM 0.3** — ORM
@@ -47,12 +49,14 @@ This document describes the technical architecture of the Modern ERP System.
 - **@nestjs/swagger** — API documentation
 
 ### Shared (`packages/*`)
+
 - **shared-types** — TypeScript types
 - **shared-schemas** — Zod schemas (used FE+BE)
 - **shared-utils** — Pure functions (formatters, calculations)
 - **eslint-config** — Shared ESLint config
 
 ### Infrastructure
+
 - **Docker + Docker Compose** — Containerization
 - **Nginx** — Reverse proxy
 - **GitHub Actions** — CI/CD

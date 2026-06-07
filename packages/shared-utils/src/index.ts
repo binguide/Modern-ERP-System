@@ -11,7 +11,11 @@ export function formatCurrency(
   }).format(amount);
 }
 
-export function formatNumber(value: number, locale: string = 'en-US', fractionDigits: number = 2): string {
+export function formatNumber(
+  value: number,
+  locale: string = 'en-US',
+  fractionDigits: number = 2,
+): string {
   return new Intl.NumberFormat(locale, {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
@@ -46,12 +50,20 @@ export function generateDocumentNumber(prefix: string, year: number, sequence: n
   return `${prefix}-${year}-${sequence.toString().padStart(4, '0')}`;
 }
 
-export function calculatePercentage(part: number, total: number, fractionDigits: number = 2): number {
+export function calculatePercentage(
+  part: number,
+  total: number,
+  fractionDigits: number = 2,
+): number {
   if (total === 0) return 0;
   return Number(((part / total) * 100).toFixed(fractionDigits));
 }
 
-export function calculateLineTotal(quantity: number, unitPrice: number, discount: number = 0): number {
+export function calculateLineTotal(
+  quantity: number,
+  unitPrice: number,
+  discount: number = 0,
+): number {
   return Number((quantity * unitPrice - discount).toFixed(4));
 }
 

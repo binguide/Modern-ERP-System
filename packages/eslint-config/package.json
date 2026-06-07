@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "main": "index.js",
-  "files": ["index.js", "react.js", "node.js"],
+  "files": [
+    "index.js",
+    "react.js",
+    "node.js"
+  ],
   "scripts": {
     "typecheck": "echo 'No typecheck needed for config package'"
   },

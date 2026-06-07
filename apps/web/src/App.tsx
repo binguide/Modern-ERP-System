@@ -10,7 +10,8 @@ const antdLocale = { ar: arEG, en: enUS } as const;
 
 export default function App() {
   const { i18n } = useTranslation();
-  const locale = (i18n.language as 'ar' | 'en') in antdLocale ? (i18n.language as 'ar' | 'en') : 'ar';
+  const locale =
+    (i18n.language as 'ar' | 'en') in antdLocale ? (i18n.language as 'ar' | 'en') : 'ar';
 
   return (
     <ConfigProvider

@@ -23,17 +23,17 @@ Built with modern web technologies, fully typed end-to-end, and designed for ext
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| **Frontend** | React 18 + Vite 5 + Ant Design 5 + TypeScript 5 |
-| **Backend** | NestJS 10 + TypeORM + PostgreSQL 16 + Redis 7 |
-| **Auth** | JWT (access + refresh) + Passport + CASL |
-| **Validation** | Zod (shared) + class-validator (backend) |
-| **State** | TanStack Query (server) + Zustand (client) |
-| **i18n** | i18next with nested JSON keys |
-| **Monorepo** | pnpm + Turborepo |
-| **CI/CD** | GitHub Actions + Docker |
-| **Testing** | Jest (BE) + Vitest (FE) + Playwright (E2E, planned) |
+| Layer          | Technology                                          |
+| -------------- | --------------------------------------------------- |
+| **Frontend**   | React 18 + Vite 5 + Ant Design 5 + TypeScript 5     |
+| **Backend**    | NestJS 10 + TypeORM + PostgreSQL 16 + Redis 7       |
+| **Auth**       | JWT (access + refresh) + Passport + CASL            |
+| **Validation** | Zod (shared) + class-validator (backend)            |
+| **State**      | TanStack Query (server) + Zustand (client)          |
+| **i18n**       | i18next with nested JSON keys                       |
+| **Monorepo**   | pnpm + Turborepo                                    |
+| **CI/CD**      | GitHub Actions + Docker                             |
+| **Testing**    | Jest (BE) + Vitest (FE) + Playwright (E2E, planned) |
 
 For the full stack and architectural decisions, see [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) and [docs/DECISIONS.md](./docs/DECISIONS.md).
 
@@ -105,6 +105,7 @@ docker compose down
 ```
 
 Access:
+
 - **Web**: http://localhost:8080 (via Nginx) or http://localhost:5173 (Vite dev)
 - **API**: http://localhost:8080/api or http://localhost:3000/api
 - **API Docs (Swagger)**: http://localhost:3000/api/docs
@@ -137,6 +138,7 @@ pnpm --filter @modern-erp/api seed
 ```
 
 **Default admin credentials** (development only):
+
 - Email: `admin@modern-erp.com`
 - Password: `admin123`
 
@@ -146,21 +148,21 @@ pnpm --filter @modern-erp/api seed
 
 Run from the **root** of the monorepo:
 
-| Command | Description |
-|---|---|
-| `pnpm install` | Install all dependencies (workspaces) |
-| `pnpm dev` | Start all apps in dev mode (parallel) |
-| `pnpm build` | Build all apps and packages |
-| `pnpm lint` | Lint all code (ESLint) |
-| `pnpm typecheck` | TypeScript type-check all code |
-| `pnpm test` | Run all tests |
-| `pnpm test:watch` | Run tests in watch mode |
-| `pnpm clean` | Clean all build outputs and caches |
-| `pnpm format` | Format all code (Prettier) |
-| `pnpm format:check` | Check code formatting |
-| `pnpm docker:dev` | Start full stack with Docker Compose |
-| `pnpm docker:down` | Stop Docker Compose stack |
-| `pnpm docker:logs` | Tail Docker Compose logs |
+| Command             | Description                           |
+| ------------------- | ------------------------------------- |
+| `pnpm install`      | Install all dependencies (workspaces) |
+| `pnpm dev`          | Start all apps in dev mode (parallel) |
+| `pnpm build`        | Build all apps and packages           |
+| `pnpm lint`         | Lint all code (ESLint)                |
+| `pnpm typecheck`    | TypeScript type-check all code        |
+| `pnpm test`         | Run all tests                         |
+| `pnpm test:watch`   | Run tests in watch mode               |
+| `pnpm clean`        | Clean all build outputs and caches    |
+| `pnpm format`       | Format all code (Prettier)            |
+| `pnpm format:check` | Check code formatting                 |
+| `pnpm docker:dev`   | Start full stack with Docker Compose  |
+| `pnpm docker:down`  | Stop Docker Compose stack             |
+| `pnpm docker:logs`  | Tail Docker Compose logs              |
 
 ### Per-app scripts
 
@@ -217,14 +219,17 @@ pnpm --filter @modern-erp/api test:cov
 ## 🌐 Internationalization
 
 The app is bilingual:
+
 - **Arabic** (ar) — primary, default
 - **English** (en) — secondary
 
 Translation files:
+
 - `apps/web/src/locales/ar.json`
 - `apps/web/src/locales/en.json`
 
 Add new translations:
+
 ```json
 {
   "sales": {
@@ -237,6 +242,7 @@ Add new translations:
 ```
 
 Use in components:
+
 ```tsx
 import { useTranslation } from 'react-i18next';
 
@@ -256,6 +262,7 @@ function MyComponent() {
 - **Seeds**: `apps/api/src/database/seeds/`
 
 Commands:
+
 ```bash
 # Generate a new migration (after entity changes)
 pnpm --filter @modern-erp/api migration:generate src/database/migrations/MyChange
@@ -276,15 +283,16 @@ pnpm --filter @modern-erp/api seed
 
 The project uses Docker Compose for local development. Services:
 
-| Service | Port | Description |
-|---|---|---|
-| `postgres` | 5432 | PostgreSQL 16 |
-| `redis` | 6379 | Redis 7 |
-| `api` | 3000 | NestJS backend (with HMR) |
-| `web` | 5173 | Vite dev server (with HMR) |
-| `nginx` | 8080 | Reverse proxy (production-like) |
+| Service    | Port | Description                     |
+| ---------- | ---- | ------------------------------- |
+| `postgres` | 5432 | PostgreSQL 16                   |
+| `redis`    | 6379 | Redis 7                         |
+| `api`      | 3000 | NestJS backend (with HMR)       |
+| `web`      | 5173 | Vite dev server (with HMR)      |
+| `nginx`    | 8080 | Reverse proxy (production-like) |
 
 Dockerfiles:
+
 - `docker/api.Dockerfile` — API (multi-stage, production-ready)
 - `docker/web.Dockerfile` — Web (production build + Nginx)
 - `docker/web.Dockerfile.dev` — Web (dev with HMR)
@@ -295,6 +303,7 @@ Dockerfiles:
 ## 🔄 CI/CD
 
 GitHub Actions workflows (in `.github/workflows/`):
+
 - **lint.yml** — ESLint check on every PR
 - **typecheck.yml** — TypeScript compile check
 - **test.yml** — Run all tests
@@ -306,15 +315,15 @@ Dependabot (`.github/dependabot.yml`) keeps dependencies up to date.
 
 ## 📚 Documentation
 
-| Document | Purpose |
-|---|---|
-| [AGENTS.md](./AGENTS.md) | Rules and conventions for AI agents and contributors |
-| [SPEC.md](./SPEC.md) | Architectural standards and tech stack decisions |
-| [PROGRESS.md](./PROGRESS.md) | Sprint progress tracker |
-| [docs/ROADMAP.md](./docs/ROADMAP.md) | Strategic plan: sprints, modules, milestones |
-| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | High-level architecture and patterns |
-| [docs/DECISIONS.md](./docs/DECISIONS.md) | Architecture Decision Records (ADRs) |
-| [docs/GLOSSARY.md](./docs/GLOSSARY.md) | Business and technical terms (AR/EN) |
+| Document                                       | Purpose                                              |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| [AGENTS.md](./AGENTS.md)                       | Rules and conventions for AI agents and contributors |
+| [SPEC.md](./SPEC.md)                           | Architectural standards and tech stack decisions     |
+| [PROGRESS.md](./PROGRESS.md)                   | Sprint progress tracker                              |
+| [docs/ROADMAP.md](./docs/ROADMAP.md)           | Strategic plan: sprints, modules, milestones         |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | High-level architecture and patterns                 |
+| [docs/DECISIONS.md](./docs/DECISIONS.md)       | Architecture Decision Records (ADRs)                 |
+| [docs/GLOSSARY.md](./docs/GLOSSARY.md)         | Business and technical terms (AR/EN)                 |
 
 ---
 

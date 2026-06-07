@@ -16,7 +16,9 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <Title level={3}>{t('dashboard.welcome', { name: user?.fullName ?? user?.email ?? '' })}</Title>
+      <Title level={3}>
+        {t('dashboard.welcome', { name: user?.fullName ?? user?.email ?? '' })}
+      </Title>
       <Text type="secondary">{t('dashboard.subtitle')}</Text>
 
       <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
@@ -37,7 +39,11 @@ export default function DashboardPage() {
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic title={t('dashboard.totalInvoices')} value={0} prefix={<FileTextOutlined />} />
+            <Statistic
+              title={t('dashboard.totalInvoices')}
+              value={0}
+              prefix={<FileTextOutlined />}
+            />
           </Card>
         </Col>
       </Row>

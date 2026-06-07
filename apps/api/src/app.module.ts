@@ -22,7 +22,6 @@ import { HealthModule } from './health/health.module';
     }),
 
     LoggerModule.forRootAsync({
-      inject: [ConfigModule],
       useFactory: () => ({
         pinoHttp: {
           level: process.env.LOG_LEVEL ?? 'info',

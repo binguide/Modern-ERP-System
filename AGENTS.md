@@ -9,50 +9,60 @@ This file defines the rules, conventions, and behavioral guidelines for AI agent
 ## 🤖 AI Agent Rules
 
 ### 1. **Read Before You Write**
+
 - Always read the relevant files (or sections) before editing.
 - Use search tools (Grep, Glob) to understand existing patterns.
 - Check `PROGRESS.md` to see what's already done.
 
 ### 2. **Follow Existing Conventions**
+
 - Mimic the style, structure, and patterns of existing code.
 - Don't introduce new libraries without justification.
 - If a library is needed, check if it's already in `package.json` first.
 
 ### 3. **Type Safety First**
+
 - TypeScript strict mode is ON. All code must compile without errors.
 - Use explicit types, avoid `any` (use `unknown` if truly needed).
 - Leverage Zod schemas for runtime validation.
 
 ### 4. **No Comments in Code (unless asked)**
+
 - Code should be self-explanatory through naming and structure.
 - Only add JSDoc/TSDoc for public APIs.
 - Do NOT add inline comments like `// increment counter`.
 
 ### 5. **Multi-Tenancy Always**
+
 - Every entity in the database that is tenant-scoped MUST have a `companyId` column.
 - Every query MUST be scoped to the current tenant (via guard/interceptor).
 - Tests MUST verify cross-tenant isolation.
 
 ### 6. **Soft Delete**
+
 - Use `@DeleteDateColumn` in TypeORM entities.
 - Never hard-delete business data.
 - Unique indexes must consider `deleted_at` (partial indexes in migrations).
 
 ### 7. **Audit Sensitive Changes**
+
 - All writes to financial/personal tables must be logged in `audit_logs`.
 - Include `userId`, `companyId`, `action`, `oldValue`, `newValue`, `ip`, `userAgent`.
 
 ### 8. **Validation Everywhere**
+
 - Backend: Use class-validator on DTOs + Zod for shared schemas.
 - Frontend: Use React Hook Form + Zod resolver.
 - Never trust client input; always validate server-side.
 
 ### 9. **Error Handling**
+
 - Throw `HttpException` (or subclasses) in services.
 - Use the global `HttpExceptionFilter` to format responses.
 - Never leak stack traces in production (handled by `NODE_ENV` check).
 
 ### 10. **Security**
+
 - Never log secrets, passwords, tokens, or PII.
 - Use parameterized queries (TypeORM does this automatically).
 - Use `bcrypt` for passwords (cost 12).
@@ -64,6 +74,7 @@ This file defines the rules, conventions, and behavioral guidelines for AI agent
 ## 📝 Coding Conventions
 
 ### File Naming
+
 - **Files**: `kebab-case.ts` (`user.service.ts`, `auth.controller.ts`)
 - **Classes**: `PascalCase` (`UserService`, `AuthController`)
 - **Functions/Variables**: `camelCase` (`getUserById`, `firstName`)
@@ -72,6 +83,7 @@ This file defines the rules, conventions, and behavioral guidelines for AI agent
 - **Enums**: `PascalCase` for enum, `UPPER_SNAKE_CASE` for values (`UserStatus.ACTIVE`)
 
 ### Folder Structure
+
 ```
 src/
 ├── modules/
@@ -93,16 +105,19 @@ src/
 ```
 
 ### Imports
+
 - Group imports: external libs, then internal (`@/`, `../`).
 - Use `import type` for type-only imports.
 - Avoid deep relative imports (`../../../`); use path aliases (`@/modules/...`).
 
 ### Error Messages
+
 - Use `i18n` keys for user-facing errors.
 - For developers, use descriptive English messages.
 - Always include context: "User not found" → "User with id '123' not found".
 
 ### Git Commits
+
 - Follow **Conventional Commits**:
   - `feat: add quotation versioning`
   - `fix: resolve race condition in stock balance update`
@@ -114,6 +129,7 @@ src/
 - Use body to explain **why**, not **what**.
 
 ### Branch Naming
+
 - `feature/{sprint}-{short-desc}` (e.g., `feature/sprint-1-auth-rbac`)
 - `fix/{issue}-{short-desc}` (e.g., `fix/123-login-redirect`)
 - `chore/{short-desc}` (e.g., `chore/update-deps`)
@@ -151,17 +167,20 @@ src/
 ## 🧪 Testing Guidelines
 
 ### Unit Tests
+
 - One test file per source file: `user.service.ts` → `user.service.spec.ts`.
 - Use **Jest** (NestJS default).
 - Test public methods only.
 - Mock external dependencies (DB, HTTP, etc.).
 
 ### Integration Tests
+
 - Use **Supertest** for HTTP endpoints.
 - Test full request/response cycle.
 - Use a separate test database.
 
 ### E2E Tests (Sprint 8)
+
 - Use **Playwright**.
 - Cover critical user flows: login, create sale, generate report.
 - Run against a fully containerized stack.
@@ -192,31 +211,37 @@ src/
 ## 🎨 Frontend Conventions
 
 ### Component Structure
+
 - **Functional components** with hooks.
 - **Props interface** defined above the component:
+
   ```tsx
   interface UserListProps {
     companyId: string;
   }
-  
+
   export function UserList({ companyId }: UserListProps) {
     // ...
   }
   ```
+
 - **Default export** for pages, **named export** for components.
 
 ### Styling
+
 - Use **Ant Design** components first.
 - Use **Tailwind CSS** for custom layouts (configured alongside AntD).
 - **Avoid** inline styles (use CSS modules or Tailwind classes).
 
 ### State Management
+
 - **Server state**: TanStack Query (`useQuery`, `useMutation`).
 - **Client state**: Zustand stores.
 - **Form state**: React Hook Form.
 - **URL state**: React Router `useSearchParams`.
 
 ### Routing
+
 - **Public routes**: `/login`, `/forgot-password`
 - **Protected routes**: wrapped in `<ProtectedRoute>`
 - **Permission-gated routes**: wrapped in `<Can I="read" a="User">`
@@ -227,6 +252,7 @@ src/
 ## 🗄️ Database Conventions
 
 ### Schema
+
 - **Tables**: `snake_case`, plural (`users`, `journal_entries`).
 - **Columns**: `snake_case` (`created_at`, `company_id`).
 - **Primary keys**: `id` (`uuid` or `int`).
@@ -237,12 +263,14 @@ src/
 - **Unique constraints**: `uq_{table}_{columns}` (e.g., `uq_users_email`).
 
 ### Migrations
+
 - One migration per change (or related set of changes).
 - **Never** edit a committed migration; create a new one to fix.
 - **Always** test migration on a copy of production data.
 - Migration file: `{TIMESTAMP}-{description}.ts` (e.g., `1704067200000-AddUsersTable.ts`).
 
 ### Seeds
+
 - Idempotent: can be run multiple times without duplicates.
 - Use `INSERT ... ON CONFLICT DO NOTHING` or check-then-insert.
 - Default roles, admin user, sample company, sample data.
@@ -252,6 +280,7 @@ src/
 ## 🔐 Security Checklist
 
 Before committing code, verify:
+
 - [ ] All endpoints require authentication (except explicitly public).
 - [ ] All queries are scoped to `companyId`.
 - [ ] No PII or secrets in logs.

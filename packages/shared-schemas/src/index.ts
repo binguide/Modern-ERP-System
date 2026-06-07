@@ -57,14 +57,22 @@ export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 
 export const createCompanySchema = z.object({
   name: z.string().min(1).max(200),
-  code: z.string().min(1).max(50).regex(/^[A-Z0-9_-]+$/, 'Code must be uppercase alphanumeric'),
+  code: z
+    .string()
+    .min(1)
+    .max(50)
+    .regex(/^[A-Z0-9_-]+$/, 'Code must be uppercase alphanumeric'),
   baseCurrency: z.string().length(3).default('SAR'),
   defaultLocale: localeSchema.default('ar'),
 });
 export type CreateCompanyInput = z.infer<typeof createCompanySchema>;
 
 export const createRoleSchema = z.object({
-  code: z.string().min(1).max(50).regex(/^[A-Z0-9_]+$/),
+  code: z
+    .string()
+    .min(1)
+    .max(50)
+    .regex(/^[A-Z0-9_]+$/),
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
   permissions: z

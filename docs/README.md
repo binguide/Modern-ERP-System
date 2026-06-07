@@ -4,12 +4,12 @@ Welcome to the Modern ERP System documentation. This is a multi-tenant ERP platf
 
 ## 📚 Available Documents
 
-| Document | Purpose |
-|---|---|
-| [ROADMAP.md](./ROADMAP.md) | Strategic plan: sprints, modules, milestones |
+| Document                             | Purpose                                         |
+| ------------------------------------ | ----------------------------------------------- |
+| [ROADMAP.md](./ROADMAP.md)           | Strategic plan: sprints, modules, milestones    |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Technical architecture: stack, layers, patterns |
-| [DECISIONS.md](./DECISIONS.md) | Architecture Decision Records (ADRs) |
-| [GLOSSARY.md](./GLOSSARY.md) | Business and technical terms (AR/EN) |
+| [DECISIONS.md](./DECISIONS.md)       | Architecture Decision Records (ADRs)            |
+| [GLOSSARY.md](./GLOSSARY.md)         | Business and technical terms (AR/EN)            |
 
 ## 🏠 Root-level Documents
 
