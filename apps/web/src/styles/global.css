@@ -41,3 +41,61 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+.ant-table-column-sorter {
+  opacity: 0.5 !important;
+}
+
+.ant-table-column-sorter-up.active,
+.ant-table-column-sorter-down.active {
+  opacity: 1 !important;
+}
+
+.ant-table-column-sorter .anticon {
+  font-size: 13px !important;
+}
+
+.ant-table-column-sorter-up.active .anticon,
+.ant-table-column-sorter-down.active .anticon {
+  font-weight: 700 !important;
+}
+
+.ant-table-thead .ant-table-cell:hover .ant-table-column-sorter {
+  opacity: 0.75 !important;
+}
+
+.odoo-group-row {
+  background-color: #f0f2f5 !important;
+  user-select: none;
+}
+
+.odoo-group-row > td {
+  padding: 10px 16px !important;
+  border-bottom: 1px solid #e8e8e8 !important;
+}
+
+.odoo-group-row .ant-table-row-expand-icon {
+  margin-right: 6px;
+}
+
+.odoo-group-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 22px;
+}
+
+.odoo-group-label .group-label-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.odoo-group-label .group-label-count {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+

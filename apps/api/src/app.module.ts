@@ -1,6 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
@@ -11,6 +11,15 @@ import envValidation from './config/env.validation';
 import jwtConfig from './config/jwt.config';
 import { redisConfig, securityConfig } from './config/redis.config';
 import { HealthModule } from './health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { RbacModule } from './modules/rbac/rbac.module';
+import { CompaniesModule } from './modules/companies/companies.module';
+import { BranchesModule } from './modules/branches/branches.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { CurrenciesModule } from './modules/currencies/currencies.module';
+import { FinanceModule } from './modules/finance/finance.module';
+import { SeedService } from './database/seed.service';
 
 @Module({
   imports: [
@@ -54,7 +63,7 @@ import { HealthModule } from './health/health.module';
         password: config.get<string>('database.password'),
         database: config.get<string>('database.database'),
         autoLoadEntities: true,
-        synchronize: false,
+        synchronize: true,
         logging: config.get<string>('database.logging') === 'true',
         migrationsRun: false,
       }),
@@ -66,8 +75,29 @@ import { HealthModule } from './health/health.module';
       },
     }),
 
+    AuthModule,
+    UsersModule,
+    RbacModule,
+    CompaniesModule,
+    BranchesModule,
+    AuditModule,
+    CurrenciesModule,
+    FinanceModule,
     HealthModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    SeedService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    {
+      provide: APP_PIPE,
+      useFactory: () =>
+        new ValidationPipe({
+          whitelist: true,
+          forbidNonWhitelisted: true,
+          transform: true,
+          transformOptions: { enableImplicitConversion: true },
+        }),
+    },
+  ],
 })
 export class AppModule {}

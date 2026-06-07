@@ -4,6 +4,7 @@ import enUS from 'antd/locale/en_US';
 import { useTranslation } from 'react-i18next';
 import { QueryProvider } from './app/providers/QueryProvider';
 import { AuthProvider } from './app/providers/AuthProvider';
+import { AbilityProvider } from './app/providers/AbilityProvider';
 import { AppRouter } from './app/router';
 
 const antdLocale = { ar: arEG, en: enUS } as const;
@@ -24,7 +25,9 @@ export default function App() {
       <AntdApp>
         <QueryProvider>
           <AuthProvider>
-            <AppRouter />
+            <AbilityProvider>
+              <AppRouter />
+            </AbilityProvider>
           </AuthProvider>
         </QueryProvider>
       </AntdApp>

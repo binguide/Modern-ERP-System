@@ -17,7 +17,7 @@ export default function DashboardPage() {
   return (
     <div>
       <Title level={3}>
-        {t('dashboard.welcome', { name: user?.fullName ?? user?.email ?? '' })}
+        {t('dashboard.welcome', { name: user ? `${user.firstName} ${user.lastName}` : '' })}
       </Title>
       <Text type="secondary">{t('dashboard.subtitle')}</Text>
 

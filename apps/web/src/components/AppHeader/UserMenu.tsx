@@ -32,7 +32,7 @@ export function UserMenu() {
     <Dropdown menu={{ items }} trigger={['click']}>
       <Space style={{ cursor: 'pointer', color: '#fff' }}>
         <Avatar size="small" icon={<UserOutlined />} />
-        <span>{user?.fullName ?? user?.email ?? t('common.guest')}</span>
+        <span>{user ? `${user.firstName} ${user.lastName}` : t('common.guest')}</span>
       </Space>
     </Dropdown>
   );

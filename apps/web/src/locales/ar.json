@@ -17,7 +17,18 @@
     "yes": "نعم",
     "no": "لا",
     "guest": "زائر",
-    "welcome": "مرحباً"
+    "welcome": "مرحباً",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "error": "حدث خطأ",
+    "confirmDelete": "هل أنت متأكد من حذف هذا العنصر؟",
+    "deleted": "تم الحذف بنجاح",
+    "noData": "لا توجد بيانات",
+    "deleteSelected": "حذف ({{count}})",
+    "groupBy": "تجميع حسب",
+    "noGroup": "بدون",
+    "columns": "الأعمدة",
+    "reset": "إعادة تعيين"
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -60,6 +71,13 @@
     "createUser": "إنشاء مستخدم",
     "editUser": "تعديل المستخدم"
   },
+  "users": {
+    "name": "الاسم",
+    "roles": "الأدوار",
+    "branch": "الفرع",
+    "status": "الحالة",
+    "confirmDeleteSelected": "هل أنت متأكد من حذف {{count}} مستخدم/مستخدمين؟"
+  },
   "role": {
     "code": "الرمز",
     "name": "الاسم",
@@ -68,6 +86,17 @@
     "isSystem": "دور نظام",
     "createRole": "إنشاء دور",
     "editRole": "تعديل الدور"
+  },
+  "roles": {
+    "code": "الرمز",
+    "name": "الاسم",
+    "description": "الوصف",
+    "permissions": "الصلاحيات",
+    "type": "النوع",
+    "system": "نظام",
+    "custom": "مخصص",
+    "cannotDeleteSystem": "لا يمكن حذف أدوار النظام",
+    "confirmDeleteSelected": "هل أنت متأكد من حذف {{count}} دور/أدوار؟"
   },
   "validation": {
     "required": "{{field}} مطلوب",

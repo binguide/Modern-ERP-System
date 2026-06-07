@@ -6,6 +6,8 @@ import { ProtectedRoute } from '@components/ProtectedRoute/ProtectedRoute';
 
 const LoginPage = lazy(() => import('@pages/auth/Login'));
 const DashboardPage = lazy(() => import('@pages/Dashboard'));
+const UsersPage = lazy(() => import('@pages/Users'));
+const RolesPage = lazy(() => import('@pages/Roles'));
 const NotFoundPage = lazy(() => import('@pages/NotFound'));
 
 const PageLoader = () => (
@@ -32,6 +34,12 @@ export function AppRouter() {
           >
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="users/new" element={<UsersPage />} />
+            <Route path="users/:id/edit" element={<UsersPage />} />
+            <Route path="roles" element={<RolesPage />} />
+            <Route path="roles/new" element={<RolesPage />} />
+            <Route path="roles/:id/edit" element={<RolesPage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

@@ -1,18 +1,17 @@
 import { ExecutionContext, createParamDecorator } from '@nestjs/common';
 
-export interface AuthUser {
-  id: string;
-  companyId: string;
-  branchId?: string;
+export interface JwtUser {
+  sub: string;
   email: string;
-  roles: string[];
-  permissions: string[];
+  companyId: string;
+  isSuperAdmin: boolean;
+  permissions: Array<{ resource: string; action: string; scope: string }>;
 }
 
 export const CurrentUser = createParamDecorator(
-  (data: keyof AuthUser | undefined, ctx: ExecutionContext): AuthUser | string | undefined => {
+  (data: keyof JwtUser | undefined, ctx: ExecutionContext): JwtUser | string | undefined => {
     const request = ctx.switchToHttp().getRequest();
-    const user: AuthUser | undefined = request.user;
+    const user: JwtUser | undefined = request.user;
     if (!user) return undefined;
     if (data) {
       return user[data] as string;

@@ -5,25 +5,45 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface Permission {
+  resource: string;
+  action: string;
+  scope: string;
+}
+
+export interface RoleInfo {
+  id: string;
+  code: string;
+  name: string;
+  permissions: Permission[];
+}
+
 export interface LoginResponse {
   accessToken: string;
-  user: {
-    id: string;
-    email: string;
-    fullName: string;
-    companyId: string;
-    roles: string[];
-    permissions: string[];
-  };
+  refreshToken: string;
+  user: User;
 }
 
 export interface User {
   id: string;
   email: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   companyId: string;
-  roles: string[];
-  permissions: string[];
+  isSuperAdmin: boolean;
+  isActive: boolean;
+  phone?: string | null;
+  avatarUrl?: string | null;
+  branchId?: string | null;
+  branch?: {
+    id: string;
+    name: string;
+    code: string;
+  } | null;
+  roles: RoleInfo[];
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt?: string | null;
 }
 
 export const authApi = {
@@ -39,10 +59,12 @@ export const authApi = {
     return data.data;
   },
   refresh: async (): Promise<{ accessToken: string }> => {
-    const { data } = await api.post<{ data: { accessToken: string } }>('/auth/refresh');
+    const { data } = await api.post<{ data: { accessToken: string } }>('/auth/refresh', {
+      refreshToken: '',
+    });
     return data.data;
   },
-  changePassword: async (oldPassword: string, newPassword: string): Promise<void> => {
-    await api.post('/auth/change-password', { oldPassword, newPassword });
+  changePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
+    await api.post('/auth/change-password', { currentPassword, newPassword });
   },
 };

@@ -17,7 +17,18 @@
     "yes": "Yes",
     "no": "No",
     "guest": "Guest",
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "active": "Active",
+    "inactive": "Inactive",
+    "error": "An error occurred",
+    "confirmDelete": "Are you sure you want to delete this item?",
+    "deleted": "Deleted successfully",
+    "noData": "No data",
+    "deleteSelected": "Delete ({{count}})",
+    "groupBy": "Group by",
+    "noGroup": "None",
+    "columns": "Columns",
+    "reset": "Reset"
   },
   "auth": {
     "login": "Login",
@@ -60,6 +71,13 @@
     "createUser": "Create User",
     "editUser": "Edit User"
   },
+  "users": {
+    "name": "Name",
+    "roles": "Roles",
+    "branch": "Branch",
+    "status": "Status",
+    "confirmDeleteSelected": "Are you sure you want to delete {{count}} users?"
+  },
   "role": {
     "code": "Code",
     "name": "Name",
@@ -68,6 +86,17 @@
     "isSystem": "System Role",
     "createRole": "Create Role",
     "editRole": "Edit Role"
+  },
+  "roles": {
+    "code": "Code",
+    "name": "Name",
+    "description": "Description",
+    "permissions": "Permissions",
+    "type": "Type",
+    "system": "System",
+    "custom": "Custom",
+    "cannotDeleteSystem": "Cannot delete system roles",
+    "confirmDeleteSelected": "Are you sure you want to delete {{count}} roles?"
   },
   "validation": {
     "required": "{{field}} is required",
