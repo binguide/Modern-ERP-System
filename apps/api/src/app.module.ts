@@ -37,10 +37,12 @@ import { HealthModule } from './health/health.module';
     }),
 
     ThrottlerModule.forRootAsync({
-      useFactory: () => ({
-        ttl: 60_000,
-        limit: 100,
-      }),
+      useFactory: () => [
+        {
+          ttl: 60_000,
+          limit: 100,
+        },
+      ],
     }),
 
     TypeOrmModule.forRootAsync({

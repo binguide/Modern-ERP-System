@@ -5,6 +5,7 @@
     "rootDir": "./src",
     "declaration": true,
     "module": "commonjs",
+    "moduleResolution": "Node",
     "target": "ES2022"
   },
   "include": ["src/**/*"],
