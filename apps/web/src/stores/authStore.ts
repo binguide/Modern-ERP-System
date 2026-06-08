@@ -10,6 +10,11 @@ interface AuthState {
   logout: () => Promise<void>;
   loadUser: () => Promise<void>;
   setUser: (user: User | null) => void;
+  updateProfile: (payload: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string | null;
+  }) => Promise<User>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -52,4 +57,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   setUser: (user) => set({ user, isAuthenticated: !!user }),
+
+  updateProfile: async (payload) => {
+    const updatedUser = await authApi.updateProfile(payload);
+    set({ user: updatedUser });
+    return updatedUser;
+  },
 }));

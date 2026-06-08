@@ -57,6 +57,8 @@ export default function App() {
           },
           Input: {
             colorBgContainer: '#f8f9fa',
+            colorBorder: '#e2e8f0',
+            hoverBorderColor: '#cbd5e1',
             activeBorderColor: '#818cf8',
             borderRadius: 8,
             borderRadiusLG: 8,
@@ -71,6 +73,8 @@ export default function App() {
           },
           Select: {
             colorBgContainer: '#f8f9fa',
+            colorBorder: '#e2e8f0',
+            hoverBorderColor: '#cbd5e1',
             activeBorderColor: '#818cf8',
             borderRadius: 8,
             borderRadiusLG: 8,

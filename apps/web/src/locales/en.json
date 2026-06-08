@@ -31,7 +31,8 @@
     "noGroup": "None",
     "columns": "Columns",
     "showHideColumns": "Show/Hide Columns",
-    "reset": "Reset"
+    "reset": "Reset",
+    "total": "Total {{count}}"
   },
   "auth": {
     "login": "Login",
@@ -44,7 +45,8 @@
     "changePassword": "Change password",
     "oldPassword": "Current password",
     "newPassword": "New password",
-    "confirmPassword": "Confirm password"
+    "confirmPassword": "Confirm password",
+    "passwordChanged": "Password changed successfully"
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -54,6 +56,23 @@
     "auditLogs": "Audit Logs",
     "settings": "Settings",
     "profile": "Profile"
+  },
+  "branches": {
+    "name": "Name",
+    "code": "Code",
+    "default": "Default",
+    "create": "Create Branch",
+    "edit": "Edit Branch"
+  },
+  "auditLogs": {
+    "date": "Date",
+    "action": "Action",
+    "resource": "Resource",
+    "resourceId": "Resource ID",
+    "userId": "User ID",
+    "ipAddress": "IP Address",
+    "details": "Details",
+    "filterResource": "Filter by resource"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",

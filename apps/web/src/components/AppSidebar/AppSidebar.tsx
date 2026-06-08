@@ -4,6 +4,7 @@ import {
   UserOutlined,
   SafetyOutlined,
   HistoryOutlined,
+  BankOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -18,6 +19,7 @@ export function AppSidebar() {
   const canReadUsers = useCan('read', 'User');
   const canReadRoles = useCan('read', 'Role');
   const canReadAudit = useCan('read', 'AuditLog');
+  const canReadBranches = useCan('read', 'Branch');
 
   const items: MenuProps['items'] = [
     {
@@ -49,6 +51,15 @@ export function AppSidebar() {
             key: '/audit-logs',
             icon: <HistoryOutlined />,
             label: t('menu.auditLogs'),
+          },
+        ]
+      : []),
+    ...(canReadBranches
+      ? [
+          {
+            key: '/branches',
+            icon: <BankOutlined />,
+            label: t('menu.branches'),
           },
         ]
       : []),

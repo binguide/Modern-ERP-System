@@ -64,6 +64,14 @@ export const authApi = {
     });
     return data.data;
   },
+  updateProfile: async (payload: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string | null;
+  }): Promise<User> => {
+    const { data } = await api.patch<{ data: User }>('/auth/profile', payload);
+    return data.data;
+  },
   changePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
     await api.post('/auth/change-password', { currentPassword, newPassword });
   },

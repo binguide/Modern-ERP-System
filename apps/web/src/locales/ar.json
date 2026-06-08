@@ -31,7 +31,8 @@
     "noGroup": "بدون",
     "columns": "الأعمدة",
     "showHideColumns": "إظهار/إخفاء الأعمدة",
-    "reset": "إعادة تعيين"
+    "reset": "إعادة تعيين",
+    "total": "المجموع {{count}}"
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -44,7 +45,8 @@
     "changePassword": "تغيير كلمة المرور",
     "oldPassword": "كلمة المرور الحالية",
     "newPassword": "كلمة المرور الجديدة",
-    "confirmPassword": "تأكيد كلمة المرور"
+    "confirmPassword": "تأكيد كلمة المرور",
+    "passwordChanged": "تم تغيير كلمة المرور بنجاح"
   },
   "menu": {
     "dashboard": "لوحة التحكم",
@@ -54,6 +56,23 @@
     "auditLogs": "سجل التدقيق",
     "settings": "الإعدادات",
     "profile": "الملف الشخصي"
+  },
+  "branches": {
+    "name": "الاسم",
+    "code": "الرمز",
+    "default": "افتراضي",
+    "create": "إنشاء فرع",
+    "edit": "تعديل الفرع"
+  },
+  "auditLogs": {
+    "date": "التاريخ",
+    "action": "الإجراء",
+    "resource": "المورد",
+    "resourceId": "معرف المورد",
+    "userId": "معرف المستخدم",
+    "ipAddress": "عنوان IP",
+    "details": "التفاصيل",
+    "filterResource": "تصفية حسب المورد"
   },
   "dashboard": {
     "welcome": "مرحباً، {{name}}",

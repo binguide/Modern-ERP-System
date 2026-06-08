@@ -9,6 +9,7 @@ import { User } from '../users/entities/user.entity';
 import { RefreshToken } from '../users/entities/refresh-token.entity';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -85,6 +86,18 @@ export class AuthService {
     });
     if (!user) throw new UnauthorizedException('User not found');
     return this.sanitizeUser(user);
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    const user = await this.userRepo.findOne({ where: { id: userId } as any });
+    if (!user) throw new UnauthorizedException('User not found');
+
+    if (dto.firstName !== undefined) user.firstName = dto.firstName;
+    if (dto.lastName !== undefined) user.lastName = dto.lastName;
+    if (dto.phone !== undefined) user.phone = dto.phone;
+
+    const saved = await this.userRepo.save(user);
+    return this.sanitizeUser(saved);
   }
 
   async changePassword(userId: string, dto: ChangePasswordDto) {

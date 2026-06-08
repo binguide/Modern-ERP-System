@@ -10,6 +10,9 @@ const UsersPage = lazy(() => import('@pages/Users'));
 const UserFormPage = lazy(() => import('@pages/UserForm'));
 const RolesPage = lazy(() => import('@pages/Roles'));
 const RoleFormPage = lazy(() => import('@pages/RoleForm'));
+const ProfilePage = lazy(() => import('@pages/Profile'));
+const AuditLogsPage = lazy(() => import('@pages/AuditLogs'));
+const BranchesPage = lazy(() => import('@pages/Branches'));
 const NotFoundPage = lazy(() => import('@pages/NotFound'));
 
 const PageLoader = () => (
@@ -42,6 +45,9 @@ export function AppRouter() {
             <Route path="roles" element={<RolesPage />} />
             <Route path="roles/new" element={<RoleFormPage />} />
             <Route path="roles/:id/edit" element={<RoleFormPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="audit-logs" element={<AuditLogsPage />} />
+            <Route path="branches" element={<BranchesPage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
