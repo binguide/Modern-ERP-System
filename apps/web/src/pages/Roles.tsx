@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Button, Space, Card, Modal, App, Popover, Tag, Dropdown } from 'antd';
-import { PlusOutlined, ReloadOutlined, DeleteOutlined, TagsOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Card, Modal, App, Popover, Tag } from 'antd';
+import { SafetyOutlined, PlusOutlined, SyncOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { rolesApi, RoleItem, QueryRolesParams } from '@lib/api/endpoints/roles';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { getActionColor } from '@lib/tag-colors';
 import { OdooTag } from '@components/OdooTag/OdooTag';
-import { ColumnsButton } from '@components/ColumnsButton/ColumnsButton';
+import { TableMenu } from '@components/TableMenu/TableMenu';
 import { useColumnVisibility } from '@lib/hooks/useColumnVisibility';
 import { transformToTreeData, isGroupRow, GroupConfig, TableRow } from '@lib/table-utils';
 
@@ -125,7 +125,30 @@ export default function RolesPage() {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const allColumns: any[] = [
+  const menuColumn: any = {
+    key: '__menu__',
+    width: 40,
+    fixed: 'right',
+    title: (
+      <TableMenu
+        columns={COLUMN_LABELS}
+        visibleColumns={visibleColumns}
+        onToggleColumn={toggleColumn}
+        onResetColumns={resetColumns}
+        groupOptions={GROUP_OPTIONS}
+        groupBy={groupBy}
+        onToggleGroup={toggleGroup}
+      />
+    ),
+    onCell: (record: TableRow<RoleItem>) => {
+      if (isGroupRow(record)) return { colSpan: 0 };
+      return {};
+    },
+    render: () => null,
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const allDataColumns: any[] = [
     {
       title: t('roles.code'),
       dataIndex: 'code',
@@ -252,11 +275,16 @@ export default function RolesPage() {
     },
   ];
 
-  const columns = allColumns.filter((col: { key: string }) => visibleColumns.includes(col.key));
+  const columns = [...allDataColumns.filter((col) => visibleColumns.includes(col.key)), menuColumn];
 
   return (
     <Card
-      title={t('menu.roles')}
+      title={
+        <>
+          <SafetyOutlined style={{ marginInlineEnd: 8 }} />
+          {t('menu.roles')}
+        </>
+      }
       extra={
         <Space>
           {selectedIds.length > 0 && (
@@ -264,31 +292,13 @@ export default function RolesPage() {
               {t('common.deleteSelected', { count: selectedIds.length })}
             </Button>
           )}
-          <ColumnsButton
-            columns={COLUMN_LABELS}
-            visibleColumns={visibleColumns}
-            onToggle={toggleColumn}
-            onReset={resetColumns}
-          />
-          <Dropdown
-            menu={{
-              selectable: true,
-              multiple: true,
-              selectedKeys: groupBy,
-              onClick: ({ key }) => toggleGroup(key),
-              items: GROUP_OPTIONS.map((o) => ({ key: o.value, label: o.label })),
-            }}
-            trigger={['click']}
-          >
-            <Button icon={<TagsOutlined />}>{t('common.groupBy')}</Button>
-          </Dropdown>
           {groupBy.map((field) => (
             <Tag key={field} closable onClose={() => toggleGroup(field)} style={{ marginRight: 0 }}>
               {groupLabels[field]}
             </Tag>
           ))}
           <Button
-            icon={<ReloadOutlined />}
+            icon={<SyncOutlined />}
             onClick={() => {
               setSelectedIds([]);
               fetchData();

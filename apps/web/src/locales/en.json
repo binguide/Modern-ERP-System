@@ -21,6 +21,8 @@
     "active": "Active",
     "inactive": "Inactive",
     "error": "An error occurred",
+    "created": "Created successfully",
+    "updated": "Updated successfully",
     "confirmDelete": "Are you sure you want to delete this item?",
     "deleted": "Deleted successfully",
     "noData": "No data",
@@ -28,6 +30,7 @@
     "groupBy": "Group by",
     "noGroup": "None",
     "columns": "Columns",
+    "showHideColumns": "Show/Hide Columns",
     "reset": "Reset"
   },
   "auth": {
@@ -61,6 +64,8 @@
     "totalInvoices": "Total Invoices"
   },
   "user": {
+    "personalInfo": "Personal Information",
+    "accountInfo": "Account Information",
     "profile": "Profile",
     "fullName": "Full Name",
     "firstName": "First Name",
@@ -79,6 +84,7 @@
     "confirmDeleteSelected": "Are you sure you want to delete {{count}} users?"
   },
   "role": {
+    "basicInfo": "Basic Information",
     "code": "Code",
     "name": "Name",
     "description": "Description",

@@ -5,6 +5,7 @@ export interface UserListItem {
   email: string;
   firstName: string;
   lastName: string;
+  phone?: string | null;
   companyId: string;
   isActive: boolean;
   isSuperAdmin: boolean;

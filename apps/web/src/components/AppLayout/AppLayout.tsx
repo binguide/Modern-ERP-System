@@ -10,7 +10,7 @@ export function AppLayout() {
       <AppHeader />
       <Layout>
         <AppSidebar />
-        <Layout.Content style={{ padding: 24 }}>
+        <Layout.Content style={{ padding: 24, background: '#f0f2f5' }}>
           <AppBreadcrumb />
           <Outlet />
         </Layout.Content>

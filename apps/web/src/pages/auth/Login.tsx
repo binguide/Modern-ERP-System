@@ -1,5 +1,5 @@
 import { Button, Card, Form, Input, Space, Typography, App } from 'antd';
-import { LockOutlined, MailOutlined } from '@ant-design/icons';
+import { LockOutlined, MailOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -46,17 +46,40 @@ export default function LoginPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #1677ff 0%, #0958d9 100%)',
+          background: 'linear-gradient(135deg, #312e81 0%, #4f46e5 50%, #6366f1 100%)',
           padding: 24,
         }}
       >
-        <Card style={{ width: 400, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Card
+          style={{
+            width: 420,
+            borderRadius: 16,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 4px 20px rgba(79,70,229,0.1)',
+          }}
+        >
+          <Space direction="vertical" style={{ width: '100%' }}>
             <div style={{ textAlign: 'center' }}>
-              <Title level={3} style={{ marginBottom: 0 }}>
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 14,
+                  background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px',
+                  boxShadow: '0 4px 12px rgba(79,70,229,0.3)',
+                }}
+              >
+                <SafetyCertificateOutlined style={{ fontSize: 28, color: '#fff' }} />
+              </div>
+              <Title level={3} style={{ marginBottom: 4 }}>
                 {t('app.name')}
               </Title>
-              <Text type="secondary">{t('auth.login')}</Text>
+              <Text type="secondary" style={{ fontSize: 15 }}>
+                {t('auth.login')}
+              </Text>
             </div>
 
             <Form<LoginFormValues>
@@ -74,7 +97,7 @@ export default function LoginPage() {
                   { type: 'email', message: t('validation.email') },
                 ]}
               >
-                <Input prefix={<MailOutlined />} placeholder="email@example.com" size="large" />
+                <Input prefix={<MailOutlined />} placeholder="email@example.com" />
               </Form.Item>
 
               <Form.Item
@@ -87,11 +110,17 @@ export default function LoginPage() {
                   },
                 ]}
               >
-                <Input.Password prefix={<LockOutlined />} placeholder="••••••••" size="large" />
+                <Input.Password prefix={<LockOutlined />} placeholder="••••••••" />
               </Form.Item>
 
-              <Form.Item>
-                <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  block
+                  loading={loading}
+                  style={{ borderRadius: 10, fontWeight: 500 }}
+                >
                   {t('auth.login')}
                 </Button>
               </Form.Item>

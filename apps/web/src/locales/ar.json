@@ -21,6 +21,8 @@
     "active": "نشط",
     "inactive": "غير نشط",
     "error": "حدث خطأ",
+    "created": "تم الإنشاء بنجاح",
+    "updated": "تم التحديث بنجاح",
     "confirmDelete": "هل أنت متأكد من حذف هذا العنصر؟",
     "deleted": "تم الحذف بنجاح",
     "noData": "لا توجد بيانات",
@@ -28,6 +30,7 @@
     "groupBy": "تجميع حسب",
     "noGroup": "بدون",
     "columns": "الأعمدة",
+    "showHideColumns": "إظهار/إخفاء الأعمدة",
     "reset": "إعادة تعيين"
   },
   "auth": {
@@ -61,6 +64,8 @@
     "totalInvoices": "إجمالي الفواتير"
   },
   "user": {
+    "personalInfo": "معلومات شخصية",
+    "accountInfo": "معلومات الحساب",
     "profile": "الملف الشخصي",
     "fullName": "الاسم الكامل",
     "firstName": "الاسم الأول",
@@ -79,6 +84,7 @@
     "confirmDeleteSelected": "هل أنت متأكد من حذف {{count}} مستخدم/مستخدمين؟"
   },
   "role": {
+    "basicInfo": "معلومات أساسية",
     "code": "الرمز",
     "name": "الاسم",
     "description": "الوصف",

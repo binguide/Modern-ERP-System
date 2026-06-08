@@ -1,5 +1,10 @@
 import { Layout, Menu, MenuProps } from 'antd';
-import { DashboardOutlined, UserOutlined, TeamOutlined, AuditOutlined } from '@ant-design/icons';
+import {
+  DashboardOutlined,
+  UserOutlined,
+  SafetyOutlined,
+  HistoryOutlined,
+} from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCan } from '@lib/permissions/useCan';
@@ -33,7 +38,7 @@ export function AppSidebar() {
       ? [
           {
             key: '/roles',
-            icon: <TeamOutlined />,
+            icon: <SafetyOutlined />,
             label: t('menu.roles'),
           },
         ]
@@ -42,7 +47,7 @@ export function AppSidebar() {
       ? [
           {
             key: '/audit-logs',
-            icon: <AuditOutlined />,
+            icon: <HistoryOutlined />,
             label: t('menu.auditLogs'),
           },
         ]
