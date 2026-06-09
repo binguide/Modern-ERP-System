@@ -1,9 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { Branch } from './entities/branch.entity';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
+
+interface QueryOptions {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+  search?: string;
+}
 
 @Injectable()
 export class BranchesService {
@@ -26,11 +34,26 @@ export class BranchesService {
     return branch;
   }
 
-  async findAll(companyId: string) {
-    return this.branchRepo.find({
-      where: { companyId } as any,
-      order: { name: 'ASC' },
+  async findAll(companyId: string, options?: QueryOptions) {
+    const page = options?.page || 1;
+    const limit = options?.limit || 20;
+    const skip = (page - 1) * limit;
+    const sortBy = options?.sortBy || 'name';
+    const sortOrder = options?.sortOrder || 'ASC';
+
+    const where: any = { companyId };
+    if (options?.search) {
+      where.name = ILike(`%${options.search}%`);
+    }
+
+    const [data, total] = await this.branchRepo.findAndCount({
+      where,
+      order: { [sortBy]: sortOrder } as any,
+      skip,
+      take: limit,
     });
+
+    return { data, total, page, limit };
   }
 
   async findById(id: string, companyId: string) {
@@ -45,11 +68,11 @@ export class BranchesService {
       const existing = await this.branchRepo.findOneBy({ code: dto.code, companyId } as any);
       if (existing) throw new NotFoundException('Branch code already exists');
     }
-    await this.branchRepo.update(id, dto as any);
-
     if (dto.isDefault) {
       await this.branchRepo.update({ companyId, isDefault: true } as any, { isDefault: false });
     }
+
+    await this.branchRepo.update(id, dto as any);
 
     return this.findById(id, companyId);
   }

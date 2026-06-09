@@ -40,10 +40,10 @@ export default function UserFormPage() {
       setLoading(true);
       try {
         const [branchesData, rolesData] = await Promise.all([
-          branchesApi.findAll(),
+          branchesApi.findAll({ page: 1, limit: 100 }),
           rolesApi.findAll({ page: 1, limit: 100 }),
         ]);
-        setBranches(branchesData);
+        setBranches(branchesData.data);
         setRoles(rolesData.data);
 
         if (id) {

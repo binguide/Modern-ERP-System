@@ -13,6 +13,15 @@ const RoleFormPage = lazy(() => import('@pages/RoleForm'));
 const ProfilePage = lazy(() => import('@pages/Profile'));
 const AuditLogsPage = lazy(() => import('@pages/AuditLogs'));
 const BranchesPage = lazy(() => import('@pages/Branches'));
+const FiscalYearsPage = lazy(() => import('@pages/FiscalYears'));
+const TaxesPage = lazy(() => import('@pages/Taxes'));
+const ChartOfAccountsPage = lazy(() => import('@pages/ChartOfAccounts'));
+const JournalEntriesPage = lazy(() => import('@pages/JournalEntries'));
+const WarehousesPage = lazy(() => import('@pages/Warehouses'));
+const ItemsPage = lazy(() => import('@pages/Items'));
+const ItemFormPage = lazy(() => import('@pages/ItemForm'));
+const UnitsOfMeasurePage = lazy(() => import('@pages/UnitsOfMeasure'));
+const ItemGroupsPage = lazy(() => import('@pages/ItemGroups'));
 const NotFoundPage = lazy(() => import('@pages/NotFound'));
 
 const PageLoader = () => (
@@ -48,6 +57,16 @@ export function AppRouter() {
             <Route path="profile" element={<ProfilePage />} />
             <Route path="audit-logs" element={<AuditLogsPage />} />
             <Route path="branches" element={<BranchesPage />} />
+            <Route path="fiscal-years" element={<FiscalYearsPage />} />
+            <Route path="taxes" element={<TaxesPage />} />
+            <Route path="chart-of-accounts" element={<ChartOfAccountsPage />} />
+            <Route path="journal-entries" element={<JournalEntriesPage />} />
+            <Route path="warehouses" element={<WarehousesPage />} />
+            <Route path="items" element={<ItemsPage />} />
+            <Route path="items/new" element={<ItemFormPage />} />
+            <Route path="items/:id/edit" element={<ItemFormPage />} />
+            <Route path="units-of-measure" element={<UnitsOfMeasurePage />} />
+            <Route path="item-groups" element={<ItemGroupsPage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

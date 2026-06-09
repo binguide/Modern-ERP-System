@@ -1,11 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Table, Card, Tag, Space, App, Typography, Button, Select } from 'antd';
-import { SyncOutlined } from '@ant-design/icons';
+import { Select } from 'antd';
+import { HistoryOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { auditApi, AuditLogEntry } from '@lib/api/endpoints/audit';
 import dayjs from 'dayjs';
-
-const { Text } = Typography;
+import { DataGrid, useDataGrid } from '@components/DataGrid';
 
 const ACTION_COLORS: Record<string, string> = {
   create: 'green',
@@ -17,34 +15,19 @@ const ACTION_COLORS: Record<string, string> = {
 
 export default function AuditLogsPage() {
   const { t } = useTranslation();
-  const { message } = App.useApp();
-  const [logs, setLogs] = useState<AuditLogEntry[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [resource, setResource] = useState<string | undefined>(undefined);
 
-  const fetchLogs = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await auditApi.findAll({ page, limit: 50, resource });
-      setLogs(result.data);
-      setTotal(result.total);
-    } catch {
-      message.error(t('common.error'));
-    } finally {
-      setLoading(false);
-    }
-  }, [page, resource, message, t]);
-
-  useEffect(() => {
-    void fetchLogs();
-  }, [fetchLogs]);
+  const grid = useDataGrid<AuditLogEntry>({
+    fetchFn: (params) => auditApi.findAll(params as Record<string, unknown>),
+    storageKey: 'audit-logs-columns',
+    columnKeys: ['createdAt', 'action', 'resource', 'resourceId', 'userId', 'ipAddress', 'details'],
+    defaultParams: { limit: 50 },
+  });
 
   const columns = [
     {
       title: t('auditLogs.date'),
       key: 'createdAt',
+      sorter: true,
       width: 180,
       render: (_: unknown, record: AuditLogEntry) =>
         dayjs(record.createdAt).format('YYYY-MM-DD HH:mm:ss'),
@@ -52,24 +35,27 @@ export default function AuditLogsPage() {
     {
       title: t('auditLogs.action'),
       key: 'action',
+      sorter: true,
       width: 100,
       render: (_: unknown, record: AuditLogEntry) => (
-        <Tag
-          color={ACTION_COLORS[record.action] || 'default'}
-          style={{ textTransform: 'capitalize' }}
+        <span
+          style={{
+            color: ACTION_COLORS[record.action] ? undefined : 'rgba(0,0,0,0.65)',
+            fontWeight: 500,
+            textTransform: 'capitalize',
+          }}
         >
           {record.action}
-        </Tag>
+        </span>
       ),
     },
     {
       title: t('auditLogs.resource'),
       key: 'resource',
+      sorter: true,
       width: 120,
       render: (_: unknown, record: AuditLogEntry) => (
-        <Text strong style={{ textTransform: 'capitalize' }}>
-          {record.resource}
-        </Text>
+        <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{record.resource}</span>
       ),
     },
     {
@@ -77,18 +63,19 @@ export default function AuditLogsPage() {
       key: 'resourceId',
       width: 140,
       dataIndex: 'resourceId',
-      render: (v: string | null) => (v ? <Text code>{v.substring(0, 8)}...</Text> : '-'),
+      render: (v: string | null) => (v ? `${v.substring(0, 8)}...` : '-'),
     },
     {
       title: t('auditLogs.userId'),
       key: 'userId',
       width: 140,
       dataIndex: 'userId',
-      render: (v: string | null) => (v ? <Text code>{v.substring(0, 8)}...</Text> : '-'),
+      render: (v: string | null) => (v ? `${v.substring(0, 8)}...` : '-'),
     },
     {
       title: t('auditLogs.ipAddress'),
       key: 'ipAddress',
+      sorter: true,
       width: 130,
       dataIndex: 'ipAddress',
       render: (v: string | null) => v || '-',
@@ -101,62 +88,53 @@ export default function AuditLogsPage() {
           const changedFields = Object.keys(record.newValues).filter(
             (k) => JSON.stringify(record.oldValues![k]) !== JSON.stringify(record.newValues![k]),
           );
-          return <Text type="secondary">{changedFields.join(', ') || '-'}</Text>;
+          return <span style={{ opacity: 0.65 }}>{changedFields.join(', ') || '-'}</span>;
         }
-        return <Text type="secondary">-</Text>;
+        return <span style={{ opacity: 0.65 }}>-</span>;
       },
     },
   ];
 
+  const handleResourceFilter = (value: string | undefined) => {
+    grid.setSelectedIds([]);
+    grid.setParams((prev) => ({ ...prev, resource: value, page: 1 }));
+  };
+
   return (
-    <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 16,
-        }}
-      >
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          {t('menu.auditLogs')}
-        </Typography.Title>
-        <Space>
-          <Select
-            allowClear
-            placeholder={t('auditLogs.filterResource')}
-            style={{ width: 160 }}
-            value={resource}
-            onChange={(v) => {
-              setResource(v);
-              setPage(1);
-            }}
-          >
-            <Select.Option value="User">User</Select.Option>
-            <Select.Option value="Role">Role</Select.Option>
-            <Select.Option value="Branch">Branch</Select.Option>
-            <Select.Option value="Company">Company</Select.Option>
-          </Select>
-          <Button icon={<SyncOutlined />} onClick={() => fetchLogs()} />
-        </Space>
-      </div>
-      <Card style={{ borderRadius: 12 }}>
-        <Table
-          dataSource={logs}
-          columns={columns}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            current: page,
-            pageSize: 50,
-            total,
-            onChange: setPage,
-            showTotal: (total) => t('common.total', { count: total }),
-          }}
-          scroll={{ x: 900 }}
-          size="middle"
-        />
-      </Card>
-    </div>
+    <DataGrid<AuditLogEntry>
+      {...grid}
+      title={t('menu.auditLogs')}
+      icon={<HistoryOutlined />}
+      columns={columns}
+      columnLabels={[
+        { key: 'createdAt', label: t('auditLogs.date') },
+        { key: 'action', label: t('auditLogs.action') },
+        { key: 'resource', label: t('auditLogs.resource') },
+        { key: 'resourceId', label: t('auditLogs.resourceId') },
+        { key: 'userId', label: t('auditLogs.userId') },
+        { key: 'ipAddress', label: t('auditLogs.ipAddress') },
+        { key: 'details', label: t('auditLogs.details') },
+      ]}
+      basePath="audit-logs"
+      search={false}
+      create={false}
+      deleteSelected={false}
+      rowClick={false}
+      emptyCreate={false}
+      toolbarExtra={
+        <Select
+          allowClear
+          placeholder={t('auditLogs.filterResource')}
+          style={{ width: 160 }}
+          value={grid.params.resource as string | undefined}
+          onChange={handleResourceFilter}
+        >
+          <Select.Option value="User">User</Select.Option>
+          <Select.Option value="Role">Role</Select.Option>
+          <Select.Option value="Branch">Branch</Select.Option>
+          <Select.Option value="Company">Company</Select.Option>
+        </Select>
+      }
+    />
   );
 }

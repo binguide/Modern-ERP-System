@@ -2,7 +2,22 @@ import { createContext, useContext } from 'react';
 import { createMongoAbility, MongoAbility, RawRuleOf } from '@casl/ability';
 
 export type Action = 'create' | 'read' | 'update' | 'delete' | 'approve' | 'export' | 'manage';
-export type Subject = 'all' | 'User' | 'Role' | 'Company' | 'Branch' | 'AuditLog' | string;
+export type Subject =
+  | 'all'
+  | 'User'
+  | 'Role'
+  | 'Company'
+  | 'Branch'
+  | 'AuditLog'
+  | 'FiscalYear'
+  | 'Account'
+  | 'JournalEntry'
+  | 'Tax'
+  | 'Warehouse'
+  | 'Item'
+  | 'UnitOfMeasure'
+  | 'ItemGroup'
+  | string;
 
 export type AppAbility = MongoAbility<[Action, Subject]>;
 

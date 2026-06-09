@@ -42,6 +42,8 @@ export class AuditService {
     action?: string;
     page?: number;
     limit?: number;
+    sortBy?: string;
+    sortOrder?: 'ASC' | 'DESC';
   }) {
     const qb = this.auditRepo.createQueryBuilder('audit');
 
@@ -62,8 +64,13 @@ export class AuditService {
     const limit = query.limit || 50;
     const skip = (page - 1) * limit;
 
+    const sortBy = query.sortBy || 'createdAt';
+    const sortOrder = query.sortOrder || 'DESC';
+    const validSortColumns = ['createdAt', 'action', 'resource', 'resourceId', 'ipAddress'];
+    const sortColumn = validSortColumns.includes(sortBy) ? `audit.${sortBy}` : 'audit.createdAt';
+
     const [data, total] = await qb
-      .orderBy('audit.createdAt', 'DESC')
+      .orderBy(sortColumn, sortOrder)
       .skip(skip)
       .take(limit)
       .getManyAndCount();

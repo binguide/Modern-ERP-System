@@ -19,6 +19,9 @@ import { BranchesModule } from './modules/branches/branches.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { CurrenciesModule } from './modules/currencies/currencies.module';
 import { FinanceModule } from './modules/finance/finance.module';
+import { TaxesModule } from './modules/taxes/taxes.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
+import { UploadModule } from './modules/upload/upload.module';
 import { SeedService } from './database/seed.service';
 
 @Module({
@@ -48,7 +51,7 @@ import { SeedService } from './database/seed.service';
       useFactory: () => [
         {
           ttl: 60_000,
-          limit: 100,
+          limit: 300,
         },
       ],
     }),
@@ -83,6 +86,9 @@ import { SeedService } from './database/seed.service';
     AuditModule,
     CurrenciesModule,
     FinanceModule,
+    TaxesModule,
+    InventoryModule,
+    UploadModule,
     HealthModule,
   ],
   providers: [

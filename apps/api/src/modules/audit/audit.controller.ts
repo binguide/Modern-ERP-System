@@ -13,9 +13,19 @@ export class AuditController {
     @CurrentUser('companyId') companyId: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: 'ASC' | 'DESC',
     @Query('resource') resource?: string,
     @Query('action') action?: string,
   ) {
-    return this.auditService.findAll({ companyId, page, limit, resource, action });
+    return this.auditService.findAll({
+      companyId,
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      resource,
+      action,
+    });
   }
 }

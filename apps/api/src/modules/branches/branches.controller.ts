@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { BranchesService } from './branches.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
@@ -16,8 +16,15 @@ export class BranchesController {
   }
 
   @Get()
-  findAll(@CurrentUser('companyId') companyId: string) {
-    return this.branchesService.findAll(companyId);
+  findAll(
+    @CurrentUser('companyId') companyId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: 'ASC' | 'DESC',
+    @Query('search') search?: string,
+  ) {
+    return this.branchesService.findAll(companyId, { page, limit, sortBy, sortOrder, search });
   }
 
   @Get(':id')

@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Space, Card, App, Modal, Form, Input, Switch, Tag, Typography } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SyncOutlined } from '@ant-design/icons';
+import { useState, useCallback, useEffect } from 'react';
+import { Modal, Form, Input, Switch, Button, App } from 'antd';
+import { BankOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import {
   branchesApi,
@@ -8,59 +8,59 @@ import {
   CreateBranchPayload,
   UpdateBranchPayload,
 } from '@lib/api/endpoints/branches';
+import { OdooTag } from '@components/OdooTag/OdooTag';
+import { DataGrid, useDataGrid } from '@components/DataGrid';
 
 export default function BranchesPage() {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const [branches, setBranches] = useState<BranchItem[]>([]);
-  const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchItem | null>(null);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
 
-  const fetchBranches = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await branchesApi.findAll();
-      setBranches(data);
-    } catch {
-      message.error(t('common.error'));
-    } finally {
-      setLoading(false);
-    }
-  }, [message, t]);
+  const grid = useDataGrid<BranchItem>({
+    fetchFn: (params) => branchesApi.findAll(params as Record<string, unknown>),
+    storageKey: 'branches-list-columns',
+    columnKeys: ['name', 'code', 'isDefault', 'isActive'],
+    groupOptions: [{ value: 'isActive', label: t('common.status') }],
+    getGroupConfig: () => ({
+      getGroupValue: (item) => (item.isActive ? 'active' : 'inactive'),
+      getGroupLabel: (v) => (v === 'active' ? t('common.active') : t('common.inactive')),
+    }),
+  });
 
-  useEffect(() => {
-    void fetchBranches();
-  }, [fetchBranches]);
-
-  const openCreate = () => {
+  const openCreate = useCallback(() => {
     setEditingBranch(null);
     form.resetFields();
     setModalOpen(true);
-  };
+  }, [form]);
 
-  const openEdit = (branch: BranchItem) => {
-    setEditingBranch(branch);
-    form.setFieldsValue(branch);
-    setModalOpen(true);
-  };
+  const openEdit = useCallback(
+    (branch: BranchItem) => {
+      setEditingBranch(branch);
+      form.setFieldsValue(branch);
+      setModalOpen(true);
+    },
+    [form],
+  );
 
-  const handleDelete = (branch: BranchItem) => {
-    Modal.confirm({
-      title: t('common.confirmDelete'),
-      onOk: async () => {
-        try {
-          await branchesApi.remove(branch.id);
+  const handleDeleteSelected = useCallback(
+    async (ids: string[]) => {
+      Modal.confirm({
+        title: t('common.confirmDelete'),
+        onOk: async () => {
+          for (const id of ids) {
+            await branchesApi.remove(id);
+          }
           message.success(t('common.deleted'));
-          void fetchBranches();
-        } catch {
-          message.error(t('common.error'));
-        }
-      },
-    });
-  };
+          grid.clearSelection();
+          grid.refresh();
+        },
+      });
+    },
+    [message, t, grid],
+  );
 
   const onFinish = async (values: Record<string, unknown>) => {
     setSaving(true);
@@ -85,7 +85,7 @@ export default function BranchesPage() {
         message.success(t('common.created'));
       }
       setModalOpen(false);
-      void fetchBranches();
+      grid.refresh();
     } catch {
       message.error(t('common.error'));
     } finally {
@@ -93,74 +93,68 @@ export default function BranchesPage() {
     }
   };
 
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (!modalOpen) {
+      setEditingBranch(null);
+    }
+  }, [modalOpen]);
+
   const columns = [
-    { title: t('branches.name'), key: 'name', dataIndex: 'name', width: 200 },
-    { title: t('branches.code'), key: 'code', dataIndex: 'code', width: 120 },
+    {
+      title: t('branches.name'),
+      key: 'name',
+      dataIndex: 'name',
+      sorter: true,
+      width: 200,
+    },
+    {
+      title: t('branches.code'),
+      key: 'code',
+      dataIndex: 'code',
+      sorter: true,
+      width: 120,
+    },
     {
       title: t('branches.default'),
       key: 'isDefault',
       width: 100,
-      render: (_: unknown, record: BranchItem) =>
-        record.isDefault ? <Tag color="blue">{t('common.yes')}</Tag> : '-',
+      render: (v: boolean) => (v ? <OdooTag color="blue">{t('common.yes')}</OdooTag> : '-'),
     },
     {
       title: t('common.status'),
+      dataIndex: 'isActive',
       key: 'isActive',
+      sorter: true,
       width: 100,
-      render: (_: unknown, record: BranchItem) => (
-        <Tag color={record.isActive ? 'green' : 'red'}>
-          {record.isActive ? t('common.active') : t('common.inactive')}
-        </Tag>
-      ),
-    },
-    {
-      title: t('common.actions'),
-      key: 'actions',
-      width: 120,
-      render: (_: unknown, record: BranchItem) => (
-        <Space>
-          <Button type="link" icon={<EditOutlined />} onClick={() => openEdit(record)} />
-          <Button
-            type="link"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record)}
-          />
-        </Space>
-      ),
+      render: (v: boolean) =>
+        v ? (
+          <OdooTag color="green">{t('common.active')}</OdooTag>
+        ) : (
+          <OdooTag color="red">{t('common.inactive')}</OdooTag>
+        ),
     },
   ];
 
   return (
-    <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 16,
-        }}
-      >
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          {t('menu.branches')}
-        </Typography.Title>
-        <Space>
-          <Button icon={<SyncOutlined />} onClick={() => fetchBranches()} />
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-            {t('common.create')}
-          </Button>
-        </Space>
-      </div>
-      <Card style={{ borderRadius: 12 }}>
-        <Table
-          dataSource={branches}
-          columns={columns}
-          rowKey="id"
-          loading={loading}
-          pagination={false}
-          size="middle"
-        />
-      </Card>
+    <>
+      <DataGrid<BranchItem>
+        {...grid}
+        title={t('menu.branches')}
+        icon={<BankOutlined />}
+        columns={columns}
+        columnLabels={[
+          { key: 'name', label: t('branches.name') },
+          { key: 'code', label: t('branches.code') },
+          { key: 'isDefault', label: t('branches.default') },
+          { key: 'isActive', label: t('common.status') },
+        ]}
+        basePath="branches"
+        groupOptions={[{ value: 'isActive', label: t('common.status') }]}
+        onRowClick={openEdit}
+        onCreate={openCreate}
+        onDeleteSelected={handleDeleteSelected}
+      />
 
       <Modal
         title={editingBranch ? t('branches.edit') : t('branches.create')}
@@ -204,6 +198,6 @@ export default function BranchesPage() {
           </div>
         </Form>
       </Modal>
-    </div>
+    </>
   );
 }

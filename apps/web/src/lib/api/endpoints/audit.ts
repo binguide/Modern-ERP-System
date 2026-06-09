@@ -25,6 +25,8 @@ export const auditApi = {
   findAll: async (params?: {
     page?: number;
     limit?: number;
+    sortBy?: string;
+    sortOrder?: 'ASC' | 'DESC';
     resource?: string;
     action?: string;
   }): Promise<PaginatedResponse<AuditLogEntry>> => {

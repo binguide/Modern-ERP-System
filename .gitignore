@@ -28,6 +28,10 @@ next-env.d.ts
 # Logs
 logs/
 *.log
+
+# Uploaded images (not committed to repo)
+apps/api/uploads/**
+!apps/api/uploads/**/.gitkeep
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
