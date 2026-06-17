@@ -17,6 +17,17 @@ export type Subject =
   | 'Item'
   | 'UnitOfMeasure'
   | 'ItemGroup'
+  | 'Customer'
+  | 'SalesOrder'
+  | 'SalesInvoice'
+  | 'DeliveryNote'
+  | 'Quotation'
+  | 'Supplier'
+  | 'PurchaseOrder'
+  | 'PurchaseReceipt'
+  | 'PurchaseInvoice'
+  | 'AssetCategory'
+  | 'FixedAsset'
   | string;
 
 export type AppAbility = MongoAbility<[Action, Subject]>;

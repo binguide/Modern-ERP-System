@@ -1,32 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Card,
-  Form,
-  Input,
-  Button,
-  Select,
-  App,
-  Spin,
-  Table,
-  Checkbox,
-  Typography,
-  Divider,
-  Row,
-  Col,
-  Tag,
-} from 'antd';
-import { InfoCircleOutlined, LockOutlined } from '@ant-design/icons';
+import { Input, App, Spin, Table, Checkbox, Select, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useForm, Controller } from 'react-hook-form';
+import { rolesApi, type PermissionInfo } from '@lib/api/endpoints/roles';
 import {
-  rolesApi,
-  PermissionInfo,
-  CreateRolePayload,
-  UpdateRolePayload,
-} from '@lib/api/endpoints/roles';
+  ErpForm,
+  ErpFormHeader,
+  ErpFormToolbar,
+  ErpFormTabs,
+  ErpFieldGrid,
+  ErpField,
+  ErpFormSidebar,
+} from '@components/Erp';
 
 const { TextArea } = Input;
-const { Title } = Typography;
 
 const RESOURCES = ['users', 'roles', 'companies', 'branches', 'currencies', 'audit', 'settings'];
 const ACTIONS = ['create', 'read', 'update', 'delete', 'manage'] as const;
@@ -47,16 +35,31 @@ const RESOURCE_LABELS: Record<string, string> = {
   settings: 'Settings',
 };
 
+interface RoleFormValues {
+  code: string;
+  name: string;
+  description: string;
+}
+
 export default function RoleFormPage() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { message } = App.useApp();
-  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [permissions, setPermissions] = useState<PermissionInfo[]>([]);
   const isEdit = Boolean(id);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<RoleFormValues>({
+    defaultValues: { code: '', name: '', description: '' },
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -64,11 +67,7 @@ export default function RoleFormPage() {
       setLoading(true);
       try {
         const role = await rolesApi.findById(id);
-        form.setFieldsValue({
-          code: role.code,
-          name: role.name,
-          description: role.description || '',
-        });
+        reset({ code: role.code, name: role.name, description: role.description || '' });
         setPermissions(role.permissions);
       } catch {
         message.error(t('common.error'));
@@ -77,7 +76,9 @@ export default function RoleFormPage() {
       }
     };
     void loadData();
-  }, [id, form, message, t]);
+  }, [id, reset, message, t]);
+
+  const [sectionTab, setSectionTab] = useState('details');
 
   const isPermissionChecked = (resource: string, action: string) =>
     permissions.some((p) => p.resource === resource && p.action === action);
@@ -85,9 +86,7 @@ export default function RoleFormPage() {
   const togglePermission = (resource: string, action: string) => {
     setPermissions((prev) => {
       const exists = prev.find((p) => p.resource === resource && p.action === action);
-      if (exists) {
-        return prev.filter((p) => !(p.resource === resource && p.action === action));
-      }
+      if (exists) return prev.filter((p) => !(p.resource === resource && p.action === action));
       return [...prev, { resource, action, scope: 'company' }];
     });
   };
@@ -108,27 +107,29 @@ export default function RoleFormPage() {
     });
   };
 
-  const onFinish = async (values: Record<string, unknown>) => {
+  const onSubmit = async (values: RoleFormValues) => {
+    if (!values.code || !values.name) {
+      message.error(t('validation.required', { field: '' }));
+      return;
+    }
     setSaving(true);
     try {
       const payloadPerms = permissions.length > 0 ? permissions : undefined;
       if (isEdit) {
-        const payload: UpdateRolePayload = {
-          code: values.code as string,
-          name: values.name as string,
-          description: (values.description as string) || undefined,
+        await rolesApi.update(id!, {
+          code: values.code,
+          name: values.name,
+          description: values.description || undefined,
           permissions: payloadPerms,
-        };
-        await rolesApi.update(id!, payload);
+        });
         message.success(t('common.updated'));
       } else {
-        const payload: CreateRolePayload = {
-          code: values.code as string,
-          name: values.name as string,
-          description: (values.description as string) || undefined,
+        await rolesApi.create({
+          code: values.code,
+          name: values.name,
+          description: values.description || undefined,
           permissions: payloadPerms,
-        };
-        await rolesApi.create(payload);
+        });
         message.success(t('common.created'));
       }
       navigate('/roles');
@@ -145,9 +146,9 @@ export default function RoleFormPage() {
       key: 'resource',
       width: 140,
       render: (_: unknown, record: PermissionRow) => (
-        <Typography.Text strong style={{ fontSize: 13 }}>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>
           {RESOURCE_LABELS[record.resource] || record.resource}
-        </Typography.Text>
+        </span>
       ),
     },
     ...ACTIONS.map((action) => ({
@@ -179,13 +180,11 @@ export default function RoleFormPage() {
             value={getScope(record.resource)}
             onChange={(v) => setScope(record.resource, v)}
             style={{ width: 100 }}
-          >
-            {SCOPES.map((s) => (
-              <Select.Option key={s} value={s}>
-                <span style={{ textTransform: 'capitalize' }}>{s}</span>
-              </Select.Option>
-            ))}
-          </Select>
+            options={SCOPES.map((s) => ({
+              value: s,
+              label: s.charAt(0).toUpperCase() + s.slice(1),
+            }))}
+          />
         );
       },
     },
@@ -193,76 +192,92 @@ export default function RoleFormPage() {
 
   const permissionData: PermissionRow[] = RESOURCES.map((resource) => ({ resource }));
 
-  if (loading) return <Spin style={{ display: 'block', margin: '64px auto' }} />;
+  if (loading) return <Spin size="large" style={{ display: 'block', margin: '64px auto' }} />;
 
   return (
-    <div style={{ maxWidth: 780, margin: '0 auto' }}>
-      <Card
-        title={
-          <span style={{ fontSize: 20, fontWeight: 600 }}>
-            {isEdit ? t('role.editRole') : t('role.createRole')}
-          </span>
-        }
-        style={{ borderRadius: 12 }}
-      >
-        <Form form={form} layout="vertical" onFinish={onFinish} scrollToFirstError>
-          <Title level={5} style={{ marginBottom: 16, color: 'rgba(0,0,0,0.65)' }}>
-            <InfoCircleOutlined style={{ marginInlineEnd: 8 }} />
-            {t('role.basicInfo')}
-          </Title>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="code"
-                label={t('role.code')}
-                rules={[
-                  { required: true, message: t('validation.required', { field: t('role.code') }) },
-                ]}
-              >
-                <Input style={{ textTransform: 'uppercase' }} placeholder="ADMIN" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="name"
-                label={t('role.name')}
-                rules={[
-                  { required: true, message: t('validation.required', { field: t('role.name') }) },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item name="description" label={t('role.description')}>
-            <TextArea rows={3} />
-          </Form.Item>
-
-          <Divider style={{ margin: '16px 0 20px' }} />
-          <Title level={5} style={{ marginBottom: 16, color: 'rgba(0,0,0,0.65)' }}>
-            <LockOutlined style={{ marginInlineEnd: 8 }} />
-            {t('role.permissions')}
-          </Title>
-          <Form.Item label={null}>
+    <div className="erpnext-form">
+      <ErpFormHeader
+        title={isEdit ? t('role.editRole') : t('role.createRole')}
+        onBack={() => navigate('/roles')}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        sidebarOpen={sidebarOpen}
+      />
+      <ErpFormToolbar
+        status="draft"
+        saving={saving}
+        onSave={handleSubmit(onSubmit)}
+        onDiscard={() => navigate('/roles')}
+      />
+      <ErpForm sidebar={<ErpFormSidebar />} sidebarOpen={sidebarOpen}>
+        <ErpFormTabs
+          tabs={[
+            { key: 'details', label: t('role.basicInfo') },
+            { key: 'permissions', label: t('role.permissions') },
+          ]}
+          activeKey={sectionTab}
+          onChange={setSectionTab}
+        >
+          {sectionTab === 'details' && (
+            <ErpFieldGrid>
+              <ErpField label={t('role.code')} required>
+                <Controller
+                  name="code"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <Input
+                        {...field}
+                        style={{ textTransform: 'uppercase' }}
+                        placeholder="ADMIN"
+                        status={errors.code ? 'error' : undefined}
+                      />
+                      {errors.code && (
+                        <span style={{ color: '#ef4444', fontSize: 11 }}>
+                          {errors.code.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                />
+              </ErpField>
+              <ErpField label={t('role.name')} required>
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <Input {...field} status={errors.name ? 'error' : undefined} />
+                      {errors.name && (
+                        <span style={{ color: '#ef4444', fontSize: 11 }}>
+                          {errors.name.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                />
+              </ErpField>
+              <ErpField label={t('role.description')} fullWidth>
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => <TextArea {...field} rows={3} />}
+                />
+              </ErpField>
+            </ErpFieldGrid>
+          )}
+          {sectionTab === 'permissions' && (
             <Table
               dataSource={permissionData}
               columns={permissionColumns}
               rowKey="resource"
               pagination={false}
               bordered
-              size="middle"
+              size="small"
+              style={{ margin: 16 }}
             />
-          </Form.Item>
-
-          <Divider style={{ margin: '20px 0 16px' }} />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <Button onClick={() => navigate('/roles')}>{t('common.cancel')}</Button>
-            <Button type="primary" htmlType="submit" loading={saving}>
-              {t('common.save')}
-            </Button>
-          </div>
-        </Form>
-      </Card>
+          )}
+        </ErpFormTabs>
+      </ErpForm>
     </div>
   );
 }

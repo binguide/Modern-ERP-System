@@ -1,39 +1,61 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Card,
-  Form,
-  Input,
-  Button,
-  Select,
-  Switch,
-  Space,
-  App,
-  Spin,
-  Divider,
-  Typography,
-  Row,
-  Col,
-} from 'antd';
-import { UserOutlined, SettingOutlined } from '@ant-design/icons';
+import { Input, Select, Switch, App, Spin } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { usersApi, CreateUserPayload, UpdateUserPayload } from '@lib/api/endpoints/users';
-import { branchesApi, BranchItem } from '@lib/api/endpoints/branches';
-import { rolesApi, RoleItem } from '@lib/api/endpoints/roles';
+import { useForm, Controller } from 'react-hook-form';
+import { usersApi, type CreateUserPayload, type UpdateUserPayload } from '@lib/api/endpoints/users';
+import { branchesApi, type BranchItem } from '@lib/api/endpoints/branches';
+import { rolesApi, type RoleItem } from '@lib/api/endpoints/roles';
+import {
+  ErpForm,
+  ErpFormHeader,
+  ErpFormToolbar,
+  ErpFormTabs,
+  ErpFieldGrid,
+  ErpField,
+  ErpFormSidebar,
+} from '@components/Erp';
 
-const { Title } = Typography;
+interface UserFormValues {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  branchId?: string;
+  roleIds: string[];
+  password?: string;
+  isActive?: boolean;
+}
 
 export default function UserFormPage() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { message } = App.useApp();
-  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [branches, setBranches] = useState<BranchItem[]>([]);
   const [roles, setRoles] = useState<RoleItem[]>([]);
   const isEdit = Boolean(id);
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<UserFormValues>({
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      branchId: undefined,
+      roleIds: [],
+      password: '',
+      isActive: true,
+    },
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -48,7 +70,7 @@ export default function UserFormPage() {
 
         if (id) {
           const user = await usersApi.findById(id);
-          form.setFieldsValue({
+          reset({
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
@@ -65,32 +87,42 @@ export default function UserFormPage() {
       }
     };
     void loadData();
-  }, [id, form, message, t]);
+  }, [id, reset, message, t]);
 
-  const onFinish = async (values: Record<string, unknown>) => {
+  const [sectionTab, setSectionTab] = useState('personal');
+
+  const onSubmit = async (values: UserFormValues) => {
+    if (!values.firstName || !values.lastName || !values.email) {
+      message.error(t('validation.required', { field: '' }));
+      return;
+    }
+    if (!isEdit && !values.password) {
+      message.error(t('validation.required', { field: t('auth.password') }));
+      return;
+    }
     setSaving(true);
     try {
       if (isEdit) {
         const payload: UpdateUserPayload = {
-          firstName: values.firstName as string,
-          lastName: values.lastName as string,
-          email: values.email as string,
-          phone: (values.phone as string) || undefined,
-          branchId: (values.branchId as string) || undefined,
-          roleIds: values.roleIds as string[] | undefined,
-          isActive: values.isActive as boolean,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          phone: values.phone || undefined,
+          branchId: values.branchId || undefined,
+          roleIds: values.roleIds.length > 0 ? values.roleIds : undefined,
+          isActive: values.isActive,
         };
         await usersApi.update(id!, payload);
         message.success(t('common.updated'));
       } else {
         const payload: CreateUserPayload = {
-          firstName: values.firstName as string,
-          lastName: values.lastName as string,
-          email: values.email as string,
-          password: values.password as string,
-          phone: (values.phone as string) || undefined,
-          branchId: (values.branchId as string) || undefined,
-          roleIds: values.roleIds as string[] | undefined,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          password: values.password!,
+          phone: values.phone || undefined,
+          branchId: values.branchId || undefined,
+          roleIds: values.roleIds.length > 0 ? values.roleIds : undefined,
         };
         await usersApi.create(payload);
         message.success(t('common.created'));
@@ -103,138 +135,165 @@ export default function UserFormPage() {
     }
   };
 
-  if (loading) return <Spin style={{ display: 'block', margin: '64px auto' }} />;
+  if (loading) return <Spin size="large" style={{ display: 'block', margin: '64px auto' }} />;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <Card
-        title={
-          <Space>
-            <span style={{ fontSize: 20, fontWeight: 600 }}>
-              {isEdit ? t('user.editUser') : t('user.createUser')}
-            </span>
-          </Space>
-        }
-        style={{ borderRadius: 12 }}
-      >
-        <Form form={form} layout="vertical" onFinish={onFinish} scrollToFirstError>
-          <Title level={5} style={{ marginBottom: 16, color: 'rgba(0,0,0,0.65)' }}>
-            <UserOutlined style={{ marginInlineEnd: 8 }} />
-            {t('user.personalInfo')}
-          </Title>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="firstName"
-                label={t('user.firstName')}
-                rules={[
-                  {
-                    required: true,
-                    message: t('validation.required', { field: t('user.firstName') }),
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="lastName"
-                label={t('user.lastName')}
-                rules={[
-                  {
-                    required: true,
-                    message: t('validation.required', { field: t('user.lastName') }),
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="email"
-                label={t('auth.email')}
-                rules={[
-                  { required: true, message: t('validation.required', { field: t('auth.email') }) },
-                  { type: 'email', message: t('validation.email') },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="phone" label={t('user.phone')}>
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Divider style={{ margin: '16px 0 20px' }} />
-          <Title level={5} style={{ marginBottom: 16, color: 'rgba(0,0,0,0.65)' }}>
-            <SettingOutlined style={{ marginInlineEnd: 8 }} />
-            {t('user.accountInfo')}
-          </Title>
-
-          {!isEdit && (
-            <Form.Item
-              name="password"
-              label={t('auth.password')}
-              rules={[
-                {
-                  required: true,
-                  message: t('validation.required', { field: t('auth.password') }),
-                },
-                { min: 8, message: t('validation.minLength', { min: 8 }) },
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
+    <div className="erpnext-form">
+      <ErpFormHeader
+        title={isEdit ? t('user.editUser') : t('user.createUser')}
+        onBack={() => navigate('/users')}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        sidebarOpen={sidebarOpen}
+      />
+      <ErpFormToolbar
+        status="draft"
+        saving={saving}
+        onSave={handleSubmit(onSubmit)}
+        onDiscard={() => navigate('/users')}
+      />
+      <ErpForm sidebar={<ErpFormSidebar />} sidebarOpen={sidebarOpen}>
+        <ErpFormTabs
+          tabs={[
+            { key: 'personal', label: t('user.personalInfo') },
+            { key: 'account', label: t('user.accountInfo') },
+            { key: 'security', label: t('auth.password') },
+          ]}
+          activeKey={sectionTab}
+          onChange={setSectionTab}
+        >
+          {sectionTab === 'personal' && (
+            <ErpFieldGrid>
+              <ErpField label={t('user.firstName')} required>
+                <Controller
+                  name="firstName"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <Input {...field} status={errors.firstName ? 'error' : undefined} />
+                      {errors.firstName && (
+                        <span style={{ color: '#ef4444', fontSize: 11 }}>
+                          {errors.firstName.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                />
+              </ErpField>
+              <ErpField label={t('user.lastName')} required>
+                <Controller
+                  name="lastName"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <Input {...field} status={errors.lastName ? 'error' : undefined} />
+                      {errors.lastName && (
+                        <span style={{ color: '#ef4444', fontSize: 11 }}>
+                          {errors.lastName.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                />
+              </ErpField>
+              <ErpField label={t('auth.email')} required>
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <Input {...field} type="email" status={errors.email ? 'error' : undefined} />
+                      {errors.email && (
+                        <span style={{ color: '#ef4444', fontSize: 11 }}>
+                          {errors.email.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                />
+              </ErpField>
+              <ErpField label={t('user.phone')}>
+                <Controller
+                  name="phone"
+                  control={control}
+                  render={({ field }) => <Input {...field} />}
+                />
+              </ErpField>
+            </ErpFieldGrid>
           )}
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item name="branchId" label={t('users.branch')}>
-                <Select allowClear placeholder={t('users.branch')}>
-                  {branches.map((b) => (
-                    <Select.Option key={b.id} value={b.id}>
-                      {b.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="roleIds" label={t('users.roles')}>
-                <Select mode="multiple" allowClear placeholder={t('users.roles')}>
-                  {roles.map((r) => (
-                    <Select.Option key={r.id} value={r.id}>
-                      {r.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-
-          {isEdit && (
-            <Form.Item name="isActive" label={t('user.isActive')} valuePropName="checked">
-              <Switch />
-            </Form.Item>
+          {sectionTab === 'account' && (
+            <ErpFieldGrid>
+              <ErpField label={t('users.branch')}>
+                <Controller
+                  name="branchId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      allowClear
+                      placeholder={t('users.branch')}
+                      value={field.value || undefined}
+                      onChange={(val) => field.onChange(val ?? undefined)}
+                      options={branches.map((b) => ({ value: b.id, label: b.name }))}
+                    />
+                  )}
+                />
+              </ErpField>
+              <ErpField label={t('users.roles')}>
+                <Controller
+                  name="roleIds"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      mode="multiple"
+                      allowClear
+                      placeholder={t('users.roles')}
+                      {...field}
+                      value={field.value || []}
+                      options={roles.map((r) => ({ value: r.id, label: r.name }))}
+                    />
+                  )}
+                />
+              </ErpField>
+              {isEdit && (
+                <ErpField label={t('user.isActive')}>
+                  <Controller
+                    name="isActive"
+                    control={control}
+                    render={({ field: { value, onChange } }) => (
+                      <Switch checked={!!value} onChange={onChange} />
+                    )}
+                  />
+                </ErpField>
+              )}
+            </ErpFieldGrid>
           )}
-
-          <Divider style={{ margin: '20px 0 16px' }} />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <Button onClick={() => navigate('/users')}>{t('common.cancel')}</Button>
-            <Button type="primary" htmlType="submit" loading={saving}>
-              {t('common.save')}
-            </Button>
-          </div>
-        </Form>
-      </Card>
+          {sectionTab === 'security' && !isEdit && (
+            <ErpFieldGrid>
+              <ErpField label={t('auth.password')} required>
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <Input.Password {...field} status={errors.password ? 'error' : undefined} />
+                      {errors.password && (
+                        <span style={{ color: '#ef4444', fontSize: 11 }}>
+                          {errors.password.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                />
+              </ErpField>
+            </ErpFieldGrid>
+          )}
+          {sectionTab === 'security' && isEdit && (
+            <div style={{ padding: 24, textAlign: 'center', color: '#8d99a6' }}>
+              {t('common.noData')}
+            </div>
+          )}
+        </ErpFormTabs>
+      </ErpForm>
     </div>
   );
 }

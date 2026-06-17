@@ -27,6 +27,8 @@ export function AppBreadcrumb() {
   const items = useMemo(() => {
     if (pathname === '/') return [];
 
+    if (pathname.includes('/new') || pathname.includes('/edit')) return [];
+
     const segments = pathname.split('/').filter(Boolean);
     const crumbItems: { title: string }[] = [];
 

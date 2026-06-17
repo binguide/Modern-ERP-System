@@ -1,0 +1,505 @@
+import { useEffect, useState } from 'react';
+import { App, Select, DatePicker, Input, InputNumber, Modal } from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams, useBlocker } from 'react-router-dom';
+import dayjs from 'dayjs';
+import { quotationsApi, type Quotation } from '@lib/api/endpoints/quotations';
+import { customersApi, type CustomerItem } from '@lib/api/endpoints/customers';
+import { unitsOfMeasureApi } from '@lib/api/endpoints/units-of-measure';
+import { ItemSelector } from '@components/ItemSelector';
+import {
+  ErpForm,
+  ErpFormHeader,
+  ErpFormToolbar,
+  ErpFormTabs,
+  ErpFieldGrid,
+  ErpField,
+  ErpFormSidebar,
+  ErpEditableTable,
+} from '@components/Erp';
+
+interface LineRow {
+  _key: string;
+  id?: string;
+  itemId?: string;
+  unit?: string;
+  quantity: number;
+  rate: number;
+  discountPct: number;
+  taxRate: number;
+  amount: number;
+}
+
+function createEmptyLine(): LineRow {
+  return {
+    _key: Math.random().toString(36).slice(2, 8),
+    quantity: 1,
+    rate: 0,
+    discountPct: 0,
+    taxRate: 0,
+    amount: 0,
+  };
+}
+
+function calcLineAmount(qty: number, rate: number, discountPct: number, taxRate: number): number {
+  const lineTotal = qty * rate;
+  const discountAmt = lineTotal * (discountPct / 100);
+  const taxable = lineTotal - discountAmt;
+  const taxAmt = taxable * (taxRate / 100);
+  return Math.round((taxable + taxAmt) * 100) / 100;
+}
+
+export default function QuotationFormPage() {
+  const { t } = useTranslation();
+  const { message } = App.useApp();
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
+
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [quotation, setQuotation] = useState<Quotation | null>(null);
+  const [customers, setCustomers] = useState<CustomerItem[]>([]);
+
+  const [quotationDate, setQuotationDate] = useState(dayjs());
+  const [validUntil, setValidUntil] = useState<dayjs.Dayjs | null>(null);
+  const [customerId, setCustomerId] = useState<string | undefined>();
+  const [notes, setNotes] = useState('');
+  const [lines, setLines] = useState<LineRow[]>([]);
+  const [unitOptions, setUnitOptions] = useState<{ value: string; label: string }[]>([]);
+
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [status, setStatus] = useState<
+    'draft' | 'saved' | 'confirmed' | 'submitted' | 'posted' | 'cancelled'
+  >('draft');
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) => currentLocation.pathname !== nextLocation.pathname,
+  );
+
+  useEffect(() => {
+    customersApi.findAll({ limit: 500 }).then((res) => setCustomers(res.data));
+  }, []);
+
+  useEffect(() => {
+    unitsOfMeasureApi
+      .findAll({ limit: 999 })
+      .then((res) =>
+        setUnitOptions(res.data.map((u) => ({ value: u.code, label: `${u.code} - ${u.name}` }))),
+      )
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    quotationsApi
+      .getById(id)
+      .then((q: Quotation) => {
+        setQuotation(q);
+        setQuotationDate(dayjs(q.quotationDate));
+        setValidUntil(q.validUntil ? dayjs(q.validUntil) : null);
+        setCustomerId(q.customerId);
+        setNotes(q.notes || '');
+        setStatus(
+          q.status as 'draft' | 'saved' | 'confirmed' | 'submitted' | 'posted' | 'cancelled',
+        );
+        setLines(
+          (q.lines || []).map(
+            (l): LineRow => ({
+              _key: Math.random().toString(36).slice(2, 8),
+              id: l.id,
+              itemId: l.itemId,
+              unit: l.unit,
+              quantity: l.quantity,
+              rate: l.rate,
+              discountPct: l.discountPct || 0,
+              taxRate: l.taxRate || 0,
+              amount: l.amount || 0,
+            }),
+          ),
+        );
+      })
+      .catch(() => {
+        message.error(t('errors.loadError'));
+        navigate('/quotations');
+      })
+      .finally(() => setLoading(false));
+  }, [id, message, t, navigate]);
+
+  function recalcLine(index: number) {
+    setLines((prev) => {
+      const next = [...prev];
+      const l = next[index];
+      if (!l) return prev;
+      next[index] = {
+        ...l,
+        amount: calcLineAmount(
+          Number(l.quantity) || 0,
+          Number(l.rate) || 0,
+          Number(l.discountPct) || 0,
+          Number(l.taxRate) || 0,
+        ),
+      };
+      return next;
+    });
+  }
+
+  function updateLine(index: number, field: string, value: string | number | null) {
+    setLines((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value } as LineRow;
+      return next;
+    });
+    setTimeout(() => recalcLine(index), 0);
+  }
+
+  function addLine() {
+    setLines((prev) => [...prev, createEmptyLine()]);
+  }
+
+  function removeLine(index: number) {
+    setLines((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  const subtotal = lines.reduce((s, l) => s + (Number(l.quantity) || 0) * (Number(l.rate) || 0), 0);
+  const discountTotal = lines.reduce(
+    (s, l) => s + (Number(l.quantity) || 0) * (Number(l.rate) || 0) * ((l.discountPct || 0) / 100),
+    0,
+  );
+  const taxTotal = lines.reduce((s, l) => {
+    const lineTotal = (Number(l.quantity) || 0) * (Number(l.rate) || 0);
+    const discAmt = lineTotal * ((l.discountPct || 0) / 100);
+    return s + (lineTotal - discAmt) * ((l.taxRate || 0) / 100);
+  }, 0);
+  const grandTotal = subtotal - discountTotal + taxTotal;
+
+  const formatted = (v: number) =>
+    v.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  function buildPayload() {
+    return {
+      quotationDate: quotationDate.format('YYYY-MM-DD'),
+      validUntil: validUntil ? validUntil.format('YYYY-MM-DD') : undefined,
+      customerId: customerId!,
+      notes: notes || undefined,
+      lines: lines.map((l) => ({
+        itemId: l.itemId || undefined,
+        unit: l.unit || undefined,
+        quantity: Number(l.quantity),
+        rate: Number(l.rate),
+        discountPct: Number(l.discountPct || 0),
+        taxRate: Number(l.taxRate || 0),
+        amount: Number(l.amount || 0),
+      })),
+    };
+  }
+
+  async function handleSave() {
+    if (!customerId) {
+      message.error(t('validation.required', { field: t('quotations.customer') }));
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = buildPayload();
+      if (isEdit) {
+        await quotationsApi.update(id!, payload);
+        message.success(t('common.updated'));
+      } else {
+        await quotationsApi.create(payload);
+        message.success(t('common.created'));
+      }
+      navigate('/quotations');
+    } catch {
+      message.error(t('errors.saveError'));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleSubmit() {
+    if (!id) return;
+    setSaving(true);
+    try {
+      await quotationsApi.submit(id);
+      message.success(t('common.updated'));
+      navigate('/quotations');
+    } catch {
+      message.error(t('errors.saveError'));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleCancelOrder() {
+    if (!id) return;
+    setSaving(true);
+    try {
+      await quotationsApi.cancel(id);
+      message.success(t('common.updated'));
+      navigate('/quotations');
+    } catch {
+      message.error(t('errors.saveError'));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const lineColumns = [
+    {
+      title: '',
+      key: 'idx',
+      width: 32,
+      render: (_: unknown, __: unknown, index: number) => (
+        <span style={{ color: '#9ca3af', fontSize: 12 }}>{index + 1}</span>
+      ),
+    },
+    {
+      title: t('common.item'),
+      key: 'item',
+      width: 180,
+      render: (_: unknown, __: unknown, index: number) => (
+        <ItemSelector
+          value={lines[index]?.itemId}
+          onChange={(val) => updateLine(index, 'itemId', val)}
+        />
+      ),
+    },
+    {
+      title: t('common.unit'),
+      key: 'unit',
+      width: 90,
+      render: (_: unknown, __: unknown, index: number) => (
+        <Select
+          size="small"
+          variant="borderless"
+          value={lines[index]?.unit || undefined}
+          onChange={(v) => updateLine(index, 'unit', v)}
+          options={unitOptions}
+          placeholder={t('common.unit')}
+        />
+      ),
+    },
+    {
+      title: t('quotations.quantity'),
+      dataIndex: 'quantity',
+      key: 'quantity',
+      width: 100,
+      render: (_: unknown, __: unknown, index: number) => (
+        <InputNumber
+          size="small"
+          variant="borderless"
+          min={0}
+          precision={2}
+          value={lines[index]?.quantity}
+          onChange={(v) => updateLine(index, 'quantity', v)}
+        />
+      ),
+    },
+    {
+      title: t('quotations.rate'),
+      dataIndex: 'rate',
+      key: 'rate',
+      width: 120,
+      render: (_: unknown, __: unknown, index: number) => (
+        <InputNumber
+          size="small"
+          variant="borderless"
+          min={0}
+          precision={2}
+          value={lines[index]?.rate}
+          onChange={(v) => updateLine(index, 'rate', v)}
+        />
+      ),
+    },
+    {
+      title: t('quotations.discountPct'),
+      dataIndex: 'discountPct',
+      key: 'discountPct',
+      width: 90,
+      render: (_: unknown, __: unknown, index: number) => (
+        <InputNumber
+          size="small"
+          variant="borderless"
+          min={0}
+          max={100}
+          precision={2}
+          value={lines[index]?.discountPct}
+          onChange={(v) => updateLine(index, 'discountPct', v)}
+        />
+      ),
+    },
+    {
+      title: t('quotations.taxRate'),
+      dataIndex: 'taxRate',
+      key: 'taxRate',
+      width: 90,
+      render: (_: unknown, __: unknown, index: number) => (
+        <InputNumber
+          size="small"
+          variant="borderless"
+          min={0}
+          max={100}
+          precision={2}
+          value={lines[index]?.taxRate}
+          onChange={(v) => updateLine(index, 'taxRate', v)}
+        />
+      ),
+    },
+    {
+      title: t('quotations.lineTotal'),
+      dataIndex: 'amount',
+      key: 'amount',
+      width: 120,
+      align: 'right' as const,
+      render: (_: unknown, __: unknown, index: number) => (
+        <span style={{ fontWeight: 500 }}>{formatted(lines[index]?.amount || 0)}</span>
+      ),
+    },
+    {
+      key: 'actions',
+      width: 32,
+      render: (_: unknown, __: unknown, index: number) => (
+        <CloseOutlined
+          style={{ fontSize: 12, cursor: 'pointer', color: '#9ca3af' }}
+          onClick={() => removeLine(index)}
+        />
+      ),
+    },
+  ];
+
+  if (loading) return null;
+
+  return (
+    <div className="erpnext-form">
+      <ErpFormHeader
+        title={isEdit ? quotation?.quotationNumber || t('quotations.edit') : t('quotations.create')}
+        status={isEdit ? status : undefined}
+        statusLabel={isEdit ? t(`quotations.status_${status}`) : undefined}
+        isDirty={false}
+        onBack={() => navigate('/quotations')}
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+        sidebarOpen={sidebarOpen}
+      />
+
+      <ErpFormToolbar
+        status={status}
+        saving={saving}
+        onSave={handleSave}
+        onSubmit={isEdit ? handleSubmit : undefined}
+        onCancelOrder={isEdit ? handleCancelOrder : undefined}
+      />
+
+      <ErpForm
+        sidebarOpen={sidebarOpen}
+        sidebar={
+          <ErpFormSidebar
+            defaultTab="activity"
+            renderTab={(tab) => {
+              if (tab === 'activity') {
+                return (
+                  <div style={{ fontSize: 12, color: '#8d99a6' }}>
+                    <p>
+                      {t('common.status')}: {t(`quotations.status_${status}`)}
+                    </p>
+                    {quotation?.createdAt && (
+                      <p>
+                        {t('common.createdAt')}:{' '}
+                        {dayjs(quotation.createdAt).format('YYYY-MM-DD HH:mm')}
+                      </p>
+                    )}
+                  </div>
+                );
+              }
+              return <p style={{ color: '#8d99a6', fontSize: 13 }}>{t('common.noData')}</p>;
+            }}
+          />
+        }
+      >
+        <ErpFormTabs
+          tabs={[{ key: 'details', label: t('common.details') }]}
+          activeKey="details"
+          onChange={() => {}}
+        >
+          <ErpFieldGrid>
+            <ErpField label={t('quotations.customer')} required>
+              <Select
+                showSearch
+                placeholder={t('quotations.selectCustomer')}
+                optionFilterProp="label"
+                style={{ width: '100%' }}
+                value={customerId}
+                onChange={setCustomerId}
+                options={customers.map((c) => ({
+                  value: c.id,
+                  label: `${c.code} - ${c.name}`,
+                }))}
+              />
+            </ErpField>
+            <ErpField label={t('quotations.quotationDate')}>
+              <DatePicker
+                style={{ width: '100%' }}
+                value={quotationDate}
+                onChange={(d) => d && setQuotationDate(d)}
+              />
+            </ErpField>
+            <ErpField label={t('quotations.validUntil')}>
+              <DatePicker
+                style={{ width: '100%' }}
+                value={validUntil}
+                onChange={(d) => setValidUntil(d)}
+              />
+            </ErpField>
+            <ErpField label={t('quotations.notes')} fullWidth>
+              <Input.TextArea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+            </ErpField>
+          </ErpFieldGrid>
+
+          <ErpEditableTable
+            value={lines}
+            columns={lineColumns}
+            rowKey="_key"
+            canEdit={status === 'draft'}
+            onAddRow={addLine}
+          />
+        </ErpFormTabs>
+
+        <div className="erp-totals-block">
+          <table className="erp-totals-table">
+            <tbody>
+              <tr>
+                <td>{t('quotations.subtotal')}</td>
+                <td>{formatted(subtotal)}</td>
+              </tr>
+              <tr>
+                <td>{t('quotations.discountTotal')}</td>
+                <td style={{ color: discountTotal ? '#dc2626' : undefined }}>
+                  -{formatted(discountTotal)}
+                </td>
+              </tr>
+              <tr>
+                <td>{t('quotations.taxTotal')}</td>
+                <td>{formatted(taxTotal)}</td>
+              </tr>
+              <tr className="erp-grand-total">
+                <td>{t('quotations.total')}</td>
+                <td>{formatted(grandTotal)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ErpForm>
+
+      <Modal
+        title={t('common.unsavedChanges')}
+        open={blocker.state === 'blocked'}
+        onOk={() => blocker.proceed?.()}
+        onCancel={() => blocker.reset?.()}
+        okText={t('common.leave')}
+        cancelText={t('common.stay')}
+      />
+    </div>
+  );
+}

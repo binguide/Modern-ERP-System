@@ -33,7 +33,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: process.env.NODE_ENV !== 'production',
     chunkSizeWarningLimit: 1024,
     rollupOptions: {
       output: {
@@ -41,6 +41,7 @@ export default defineConfig({
           react: ['react', 'react-dom', 'react-router-dom'],
           antd: ['antd', '@ant-design/icons'],
           query: ['@tanstack/react-query'],
+          charts: ['@ant-design/charts'],
         },
       },
     },

@@ -85,3 +85,17 @@ temp/
 
 # Husky
 .husky/_/
+
+# Process output files
+*_log.txt
+*_out.txt
+*_output.txt
+*_term.txt
+*_term2.txt
+
+# Temp screenshots
+*.png
+!apps/web/public/**/*.png
+
+# Temp design docs
+docs/Sales Order.dc.html

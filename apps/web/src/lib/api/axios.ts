@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? '').trim();
 const ACCESS_TOKEN_KEY = 'erp_access_token';
 
 export const tokenStorage = {

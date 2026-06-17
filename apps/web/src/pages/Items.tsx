@@ -156,123 +156,126 @@ export default function ItemsPage() {
   };
 
   return (
-    <DataGrid<ItemItem>
-      {...grid}
-      title={t('menu.items')}
-      icon={<AppstoreOutlined />}
-      columns={columns}
-      columnLabels={[
-        { key: 'imageUrl', label: t('items.imageUrl') },
-        { key: 'sku', label: t('items.sku') },
-        { key: 'name', label: t('items.name') },
-        { key: 'type', label: t('items.type') },
-        { key: 'itemGroup', label: t('items.itemGroup') },
-        { key: 'costPrice', label: t('items.costPrice') },
-        { key: 'sellingPrice', label: t('items.sellingPrice') },
-        { key: 'reorderPoint', label: t('items.reorderPoint') },
-        { key: 'defaultWarehouse', label: t('items.defaultWarehouse') },
-        { key: 'isActive', label: t('common.status') },
-      ]}
-      basePath="items"
-      onDeleteSelected={handleDeleteSelected}
-      toolbarExtra={
-        <Tooltip title={viewMode === 'table' ? t('items.cardView') : t('items.tableView')}>
-          <Button
-            icon={viewMode === 'table' ? <PictureOutlined /> : <UnorderedListOutlined />}
-            onClick={toggleViewMode}
-          />
-        </Tooltip>
-      }
-    >
-      {viewMode === 'cards' ? (
-        <>
-          {grid.loading ? (
-            <Spin style={{ display: 'block', margin: '64px auto' }} />
-          ) : (
-            <>
-              <Row gutter={[16, 16]}>
-                {(grid.tableData as unknown as ItemItem[]).map((item) => (
-                  <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
-                    <AntCard
-                      hoverable
-                      onClick={() => navigate(`/items/${item.id}/edit`)}
-                      cover={
-                        item.imageUrl ? (
-                          <div style={{ height: 160, overflow: 'hidden' }}>
-                            <Image
-                              src={`${API_BASE}${item.imageUrl}`}
-                              style={{ width: '100%', height: 160, objectFit: 'cover' }}
-                              preview={false}
-                            />
-                          </div>
-                        ) : (
-                          <div
-                            style={{
-                              height: 160,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              background: '#fafafa',
-                            }}
-                          >
-                            <PictureOutlined style={{ fontSize: 64, color: '#d9d9d9' }} />
-                          </div>
-                        )
-                      }
-                      style={{ borderRadius: 10 }}
-                      bodyStyle={{ padding: '12px 16px' }}
-                    >
-                      <AntCard.Meta
-                        title={
-                          <Space style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>
-                            {item.name}
-                          </Space>
+    <div className="erpnext-list">
+      <DataGrid<ItemItem>
+        {...grid}
+        title={t('menu.items')}
+        icon={<AppstoreOutlined />}
+        columns={columns}
+        columnLabels={[
+          { key: 'imageUrl', label: t('items.imageUrl') },
+          { key: 'sku', label: t('items.sku') },
+          { key: 'name', label: t('items.name') },
+          { key: 'type', label: t('items.type') },
+          { key: 'itemGroup', label: t('items.itemGroup') },
+          { key: 'costPrice', label: t('items.costPrice') },
+          { key: 'sellingPrice', label: t('items.sellingPrice') },
+          { key: 'reorderPoint', label: t('items.reorderPoint') },
+          { key: 'defaultWarehouse', label: t('items.defaultWarehouse') },
+          { key: 'isActive', label: t('common.status') },
+        ]}
+        basePath="items"
+        onDeleteSelected={handleDeleteSelected}
+        toolbarExtra={
+          <Tooltip title={viewMode === 'table' ? t('items.cardView') : t('items.tableView')}>
+            <Button
+              icon={viewMode === 'table' ? <PictureOutlined /> : <UnorderedListOutlined />}
+              onClick={toggleViewMode}
+            />
+          </Tooltip>
+        }
+      >
+        {viewMode === 'cards' ? (
+          <>
+            {grid.loading ? (
+              <Spin style={{ display: 'block', margin: '64px auto' }} />
+            ) : (
+              <>
+                <Row gutter={[16, 16]}>
+                  {(grid.tableData as unknown as ItemItem[]).map((item) => (
+                    <Col xs={12} sm={8} md={6} lg={4} key={item.id}>
+                      <AntCard
+                        hoverable
+                        size="small"
+                        onClick={() => navigate(`/items/${item.id}/edit`)}
+                        cover={
+                          item.imageUrl ? (
+                            <div style={{ height: 100, overflow: 'hidden' }}>
+                              <Image
+                                src={`${API_BASE}${item.imageUrl}`}
+                                style={{ width: '100%', height: 100, objectFit: 'cover' }}
+                                preview={false}
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                height: 100,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: '#fafafa',
+                              }}
+                            >
+                              <PictureOutlined style={{ fontSize: 36, color: '#d9d9d9' }} />
+                            </div>
+                          )
                         }
-                        description={
-                          <div style={{ fontSize: 12, color: '#666' }}>
-                            <div>
-                              <strong>{t('items.sku')}:</strong> {item.sku}
+                        style={{ borderRadius: 8 }}
+                        styles={{ body: { padding: '8px 12px' } }}
+                      >
+                        <AntCard.Meta
+                          title={
+                            <Space style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.3 }}>
+                              {item.name}
+                            </Space>
+                          }
+                          description={
+                            <div style={{ fontSize: 11, color: '#666' }}>
+                              <div>
+                                <strong>{t('items.sku')}:</strong> {item.sku}
+                              </div>
+                              <div>
+                                <strong>{t('items.type')}:</strong> {t(`items.${item.type}`)}
+                              </div>
+                              <div style={{ marginTop: 2 }}>
+                                <strong>{t('items.sellingPrice')}:</strong>{' '}
+                                <span style={{ color: '#52c41a', fontWeight: 600 }}>
+                                  {Number(item.sellingPrice).toFixed(2)}
+                                </span>
+                              </div>
+                              <div style={{ marginTop: 4 }}>
+                                {item.isActive ? (
+                                  <OdooTag color="green">{t('common.active')}</OdooTag>
+                                ) : (
+                                  <OdooTag color="red">{t('common.inactive')}</OdooTag>
+                                )}
+                              </div>
                             </div>
-                            <div>
-                              <strong>{t('items.type')}:</strong> {t(`items.${item.type}`)}
-                            </div>
-                            <div style={{ marginTop: 4 }}>
-                              <strong>{t('items.sellingPrice')}:</strong>{' '}
-                              <span style={{ color: '#52c41a', fontWeight: 600 }}>
-                                {Number(item.sellingPrice).toFixed(2)}
-                              </span>
-                            </div>
-                            <div style={{ marginTop: 6 }}>
-                              {item.isActive ? (
-                                <OdooTag color="green">{t('common.active')}</OdooTag>
-                              ) : (
-                                <OdooTag color="red">{t('common.inactive')}</OdooTag>
-                              )}
-                            </div>
-                          </div>
-                        }
-                      />
-                    </AntCard>
-                  </Col>
-                ))}
-              </Row>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-                <Pagination
-                  current={grid.params.page}
-                  pageSize={grid.params.limit}
-                  total={grid.total}
-                  showSizeChanger
-                  pageSizeOptions={['10', '20', '50']}
-                  onChange={(page, limit) => {
-                    grid.setSelectedIds([]);
-                    grid.setParams((prev) => ({ ...prev, page, limit }));
-                  }}
-                />
-              </div>
-            </>
-          )}
-        </>
-      ) : null}
-    </DataGrid>
+                          }
+                        />
+                      </AntCard>
+                    </Col>
+                  ))}
+                </Row>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                  <Pagination
+                    current={grid.params.page}
+                    pageSize={grid.params.limit}
+                    total={grid.total}
+                    showSizeChanger
+                    pageSizeOptions={['10', '20', '50']}
+                    onChange={(page, limit) => {
+                      grid.setSelectedIds([]);
+                      grid.setParams((prev) => ({ ...prev, page, limit }));
+                    }}
+                  />
+                </div>
+              </>
+            )}
+          </>
+        ) : null}
+      </DataGrid>
+    </div>
   );
 }

@@ -151,25 +151,27 @@ export default function UsersPage() {
   ];
 
   return (
-    <DataGrid<UserListItem>
-      {...grid}
-      title={t('menu.users')}
-      icon={<UserOutlined />}
-      columns={columns}
-      columnLabels={[
-        { key: 'firstName', label: t('users.name') },
-        { key: 'email', label: t('auth.email') },
-        { key: 'roles', label: t('users.roles') },
-        { key: 'branch', label: t('users.branch') },
-        { key: 'isActive', label: t('users.status') },
-        { key: 'lastLoginAt', label: t('user.lastLogin') },
-      ]}
-      basePath="users"
-      groupOptions={[
-        { value: 'branch', label: t('users.branch') },
-        { value: 'isActive', label: t('users.status') },
-      ]}
-      onDeleteSelected={handleDeleteSelected}
-    />
+    <div className="erpnext-list">
+      <DataGrid<UserListItem>
+        {...grid}
+        title={t('menu.users')}
+        icon={<UserOutlined />}
+        columns={columns}
+        columnLabels={[
+          { key: 'firstName', label: t('users.name') },
+          { key: 'email', label: t('auth.email') },
+          { key: 'roles', label: t('users.roles') },
+          { key: 'branch', label: t('users.branch') },
+          { key: 'isActive', label: t('users.status') },
+          { key: 'lastLoginAt', label: t('user.lastLogin') },
+        ]}
+        basePath="users"
+        groupOptions={[
+          { value: 'branch', label: t('users.branch') },
+          { value: 'isActive', label: t('users.status') },
+        ]}
+        onDeleteSelected={handleDeleteSelected}
+      />
+    </div>
   );
 }

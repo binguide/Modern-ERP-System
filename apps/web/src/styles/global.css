@@ -23,17 +23,12 @@ body,
   min-height: 100vh;
 }
 
-body {
-  background-color: #f0f2f5;
-  color: rgba(0, 0, 0, 0.88);
-}
-
 [dir='rtl'] body {
-  font-family: 'Tajawal', 'Inter', sans-serif;
+  font-family: 'Tajawal', 'Plus Jakarta Sans', sans-serif;
 }
 
 [dir='ltr'] body {
-  font-family: 'Inter', 'Tajawal', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Tajawal', sans-serif;
 }
 
 .ant-typography,
@@ -57,59 +52,40 @@ body {
   font-family: inherit;
 }
 
-.ant-input,
-.ant-select-selector,
-.ant-picker {
-  border-width: 2px !important;
-  border-color: transparent !important;
-}
-
-.ant-input:focus,
-.ant-input-focused,
-.ant-select-focused .ant-select-selector,
-.ant-picker-focused {
-  border-color: #94a3b8 !important;
-}
-
 a {
   color: inherit;
   text-decoration: none;
 }
 
 .ant-table-column-sorter {
-  opacity: 0.5 !important;
+  opacity: 0.5;
 }
 
 .ant-table-column-sorter-up.active,
 .ant-table-column-sorter-down.active {
-  opacity: 1 !important;
+  opacity: 1;
 }
 
 .ant-table-column-sorter .anticon {
-  font-size: 13px !important;
+  font-size: 13px;
 }
 
 .ant-table-column-sorter-up.active .anticon,
 .ant-table-column-sorter-down.active .anticon {
-  font-weight: 700 !important;
+  font-weight: 700;
 }
 
 .ant-table-thead .ant-table-cell:hover .ant-table-column-sorter {
-  opacity: 0.75 !important;
+  opacity: 0.75;
 }
 
 .odoo-group-row {
-  background-color: #f0f2f5 !important;
   user-select: none;
 }
 
 .odoo-group-row > td {
-  padding: 10px 16px !important;
-  border-bottom: 1px solid #e8e8e8 !important;
-}
-
-.odoo-group-row .ant-table-row-expand-icon {
-  margin-right: 6px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .odoo-group-label {
@@ -134,21 +110,521 @@ a {
 
 .table-menu-trigger:hover {
   background: rgba(0, 0, 0, 0.06);
-  color: rgba(0, 0, 0, 0.65) !important;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.ant-card {
+  transition: box-shadow 0.2s ease;
+}
+
+.ant-card-hoverable:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 8px -2px rgba(0, 0, 0, 0.04);
+}
+
+.ant-table-wrapper {
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .ant-table-thead > tr > th {
+  font-weight: 700;
+  background-color: #f1f5f9 !important;
+  color: #374151 !important;
+  font-size: 12px !important;
   padding: 8px 12px !important;
-  line-height: 20px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  border-top: 1px solid #e5e7eb;
 }
 
 .ant-table-tbody > tr > td {
   padding: 8px 12px !important;
-  line-height: 20px !important;
+  font-size: 13px;
+  color: #4b5563;
+  border-bottom: 1px solid #f3f4f6 !important;
+  transition: background-color 0.15s ease;
 }
 
-.ant-table-footer {
-  padding: 8px 12px !important;
+.ant-table-tbody > tr:nth-child(even) > td {
+  background-color: #fafafa;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background-color: #f5f5f5 !important;
+}
+
+.ant-table-tbody > tr:last-child > td {
+  border-bottom: none !important;
+}
+
+.ant-table-row .row-actions {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.ant-table-row:hover .row-actions {
+  opacity: 1;
+}
+
+.ant-table-pagination {
+  padding: 12px 16px !important;
+  border-top: 1px solid #e5e7eb;
+}
+
+.ant-table-column-sorter {
+  opacity: 0.5;
+}
+
+.ant-table-column-sorter-up.active,
+.ant-table-column-sorter-down.active {
+  opacity: 1;
+}
+
+.ant-table-column-sorter .anticon {
+  font-size: 13px;
+}
+
+.ant-table-column-sorter-up.active .anticon,
+.ant-table-column-sorter-down.active .anticon {
+  font-weight: 700;
+}
+
+.ant-table-thead .ant-table-cell:hover .ant-table-column-sorter {
+  opacity: 0.75;
+}
+
+.ant-input-affix-wrapper {
+  border-width: 1px;
+}
+
+/* Row Index Column */
+.row-index {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  width: 40px;
+  min-width: 40px;
+}
+
+/* ERPnext-style Status Tags */
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+
+.status-tag .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Action buttons hover effect */
+.action-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.ant-table-row:hover .action-btn,
+.ant-table-row .action-btn.visible {
+  opacity: 1;
+}
+
+/* Compact form styling */
+.erpnext-form .ant-card-body {
+  padding: 20px;
+}
+
+.erpnext-form .ant-tabs-nav {
+  margin-bottom: 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.erpnext-form .ant-tabs-tab {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Breadcrumb styling */
+.erp-breadcrumb {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.erp-breadcrumb .ant-breadcrumb-separator {
+  color: #d1d5db;
+}
+
+/* ActionBar styling */
+.erp-action-bar {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Many2One field */
+.many2one-field .ant-select-selector {
+  border-radius: 4px !important;
+}
+
+/* ===== ERPNext v16 Form Styles ===== */
+
+/* Document Title Bar */
+.erp-document-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.erp-document-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.erp-document-header .erp-status-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Document Toolbar */
+.erp-toolbar {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.erp-toolbar .ant-btn {
+  font-size: 13px;
+}
+
+/* Form Body Layout */
+.erp-form-body {
+  display: flex;
+  gap: 0;
+  min-height: calc(100vh - 220px);
+}
+
+.erp-form-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.erp-form-sidebar {
+  width: 320px;
+  border-left: 1px solid #e5e7eb;
+  background: #fafafa;
+  flex-shrink: 0;
+}
+
+.erp-form-sidebar.collapsed {
+  display: none;
+}
+
+/* Section Tabs */
+.erp-section-tabs {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 24px;
+  background: #ffffff;
+  display: flex;
+  gap: 0;
+}
+
+.erp-section-tabs .erp-tab-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.erp-section-tabs .erp-tab-btn:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.erp-section-tabs .erp-tab-btn.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+/* Section Body */
+.erp-section-body {
+  padding: 20px 24px;
+  background: #ffffff;
+}
+
+/* ERPNext Compact Field Grid */
+.erp-field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px 24px;
+}
+
+.erp-field-grid .ant-form-item {
+  margin-bottom: 0;
+}
+
+.erp-field-grid .ant-form-item-label {
+  padding-bottom: 2px;
+}
+
+.erp-field-grid .ant-form-item-label label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  height: auto;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.erp-field-full {
+  grid-column: 1 / -1;
+}
+
+/* Items Table (ERPNext style) */
+.erp-items-table {
+  margin: 16px 24px;
+}
+
+.erp-items-table .ant-table {
+  font-size: 13px;
+}
+
+.erp-items-table .ant-table-thead > tr > th {
+  background: #f3f4f6;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #6b7280;
+  padding: 6px 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.erp-items-table .ant-table-tbody > tr > td {
+  padding: 4px 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.erp-items-table .ant-table-tbody > tr:hover > td,
+.erp-items-table .ant-table-tbody > tr.ant-table-row:hover > td {
+  background: transparent !important;
+}
+
+.erp-items-table .ant-input-number {
+  width: 100%;
+}
+
+.erp-items-table .ant-input-number-input {
+  padding: 2px 6px;
+  height: 28px;
+}
+
+.erp-items-table .ant-table-tbody > tr > td:focus-within {
+  box-shadow: inset 0 0 0 1.5px #9ca3af !important;
+}
+
+/* Hide number input spinners everywhere */
+.ant-input-number-handler-wrap {
+  display: none !important;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield !important;
+}
+
+/* Totals block */
+.erp-totals-block {
+  margin: 8px 24px 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.erp-totals-table {
+  width: 320px;
+  font-size: 13px;
+}
+
+.erp-totals-table td {
+  padding: 4px 12px;
+}
+
+.erp-totals-table td:last-child {
+  text-align: right;
+  font-weight: 500;
+}
+
+.erp-totals-table .erp-grand-total td {
+  font-size: 15px;
+  font-weight: 700;
+  border-top: 2px solid #e5e7eb;
+  padding-top: 8px;
+}
+
+/* Sidebar Sub-tabs */
+.erp-sidebar-tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.erp-sidebar-tabs .erp-tab-btn {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.erp-sidebar-tabs .erp-tab-btn.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.erp-sidebar-content {
+  padding: 16px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Zebra striping for items table */
+.erp-items-table .ant-table-tbody > tr:nth-child(even) > td {
+  background: #fff;
+}
+
+/* ===== ERPNext v16 List View Styles ===== */
+
+.erpnext-list .ant-card {
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.erpnext-list .ant-card-head {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 20px;
+  min-height: 0;
+}
+
+.erpnext-list .ant-card-head-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.erpnext-list .ant-card-head-title {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 0;
+  color: #111827;
+}
+
+.erpnext-list .ant-card-extra {
+  padding: 0;
+}
+
+.erpnext-list .ant-card-body {
+  padding: 0;
+}
+
+.erpnext-list .ant-table-thead > tr > th {
+  background: #f9fafb;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #6b7280;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.erpnext-list .ant-table-tbody > tr > td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.erpnext-list .ant-table-tbody > tr:hover > td,
+.erpnext-list .ant-table-tbody > tr.ant-table-row:hover > td {
+  background: #f9fafb;
+}
+
+.erpnext-list .ant-table-tbody > tr:nth-child(even) > td {
+  background: #fafbfc;
+}
+
+.erpnext-list .ant-table-tbody > tr:nth-child(even):hover > td {
+  background: #f3f4f6;
+}
+
+.erpnext-list .ant-table-pagination {
+  padding: 12px 20px !important;
+  margin: 0 !important;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.erpnext-list .ant-input-search {
+  border-radius: 4px;
+}
+
+.erpnext-list .ant-input-search .ant-input {
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+/* Delete line button */
+.erp-delete-line-btn {
+  color: #9ca3af;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.erp-items-table .ant-table-tbody > tr:hover .erp-delete-line-btn {
+  opacity: 1;
 }
 
 

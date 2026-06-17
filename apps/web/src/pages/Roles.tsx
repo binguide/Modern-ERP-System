@@ -118,21 +118,23 @@ export default function RolesPage() {
   ];
 
   return (
-    <DataGrid<RoleItem>
-      {...grid}
-      title={t('menu.roles')}
-      icon={<SafetyOutlined />}
-      columns={columns}
-      columnLabels={[
-        { key: 'code', label: t('roles.code') },
-        { key: 'name', label: t('roles.name') },
-        { key: 'description', label: t('roles.description') },
-        { key: 'permissions', label: t('roles.permissions') },
-        { key: 'isSystem', label: t('roles.type') },
-      ]}
-      basePath="roles"
-      groupOptions={[{ value: 'isSystem', label: t('roles.type') }]}
-      onDeleteSelected={handleDeleteSelected}
-    />
+    <div className="erpnext-list">
+      <DataGrid<RoleItem>
+        {...grid}
+        title={t('menu.roles')}
+        icon={<SafetyOutlined />}
+        columns={columns}
+        columnLabels={[
+          { key: 'code', label: t('roles.code') },
+          { key: 'name', label: t('roles.name') },
+          { key: 'description', label: t('roles.description') },
+          { key: 'permissions', label: t('roles.permissions') },
+          { key: 'isSystem', label: t('roles.type') },
+        ]}
+        basePath="roles"
+        groupOptions={[{ value: 'isSystem', label: t('roles.type') }]}
+        onDeleteSelected={handleDeleteSelected}
+      />
+    </div>
   );
 }

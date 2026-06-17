@@ -17,6 +17,7 @@ This document tracks the progress of each sprint, with checkboxes for each deliv
 | **6**  | POS                         | 📋 Planned | ░░░░░░░░░░ 0%   | TBD        | TBD        |
 | **7**  | Advanced Reports + HR + Mfg | 📋 Planned | ░░░░░░░░░░ 0%   | TBD        | TBD        |
 | **8**  | Integrations + Polish       | 📋 Planned | ░░░░░░░░░░ 0%   | TBD        | TBD        |
+| **—**  | UI Imp. & Form Migration    | ✅ Done    | ██████████ 100% | 2026-06-14 | 2026-06-14 |
 
 **Legend**: ✅ Done | 🚧 In Progress | 📋 Planned | 🔜 Future | ❌ Blocked | ⚠️ At Risk
 
@@ -408,14 +409,22 @@ _(To be detailed when Sprint 7 is complete)_
 
 ## 📝 Change Log
 
-| Date       | Sprint | Change                                                             |
-| ---------- | ------ | ------------------------------------------------------------------ |
-| 2026-01-XX | 0      | Sprint 0 started: repository setup, monorepo, tooling              |
-| 2026-01-XX | 0      | Documentation created: AGENTS.md, SPEC.md, PROGRESS.md, docs/      |
-| 2026-01-XX | 0      | Code quality tools configured: ESLint, Prettier, Husky, Commitlint |
+| Date       | Sprint | Change                                                                                                                                                                                                       |
+| ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-01-XX | 0      | Sprint 0 started: repository setup, monorepo, tooling                                                                                                                                                        |
+| 2026-01-XX | 0      | Documentation created: AGENTS.md, SPEC.md, PROGRESS.md, docs/                                                                                                                                                |
+| 2026-01-XX | 0      | Code quality tools configured: ESLint, Prettier, Husky, Commitlint                                                                                                                                           |
+| 2026-06-14 | 0      | UI/UX: ErrorBoundary + PageSkeleton + PageTransitions (framer-motion)                                                                                                                                        |
+| 2026-06-14 | 0      | Dashboard: API dashboard module with stats, monthly sales, top customers, recent orders                                                                                                                      |
+| 2026-06-14 | 0      | Dashboard: Frontend with Ant Design Charts (Column, Pie) + real data                                                                                                                                         |
+| 2026-06-14 | 0      | Dark Mode: Theme toggle with localStorage persistence, darkAlgorithm                                                                                                                                         |
+| 2026-06-14 | —      | Form Migration: Migrated 12 forms from AntD Form to RHF+Zod (Login, Branches, Customers, ItemGroups, UnitsOfMeasure, Warehouses, Taxes, FiscalYears, UserForm, RoleForm, ChartOfAccounts, Profile, ItemForm) |
+| 2026-06-14 | —      | FormField component created (RHF Controller + AntD Form.Item wrapper with cloneElement pattern)                                                                                                              |
+| 2026-06-14 | —      | Portal: API moved to port 3020, CORS expanded, shared-schemas rebuilt as ESM                                                                                                                                 |
+| 2026-06-14 | —      | Journal Entry Form: Full-page form created (ERPNext v16 style) with RHF+Zod, inline-editable lines table, balance indicator, post/cancel actions, route blocker, keyboard shortcuts                          |
 
 ---
 
-**Last Updated:** 2026-01-XX
+**Last Updated:** 2026-06-14
 **Current Sprint:** 0 (Foundation)
 **Next Milestone:** M1 — Foundation Ready

@@ -1,62 +1,122 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useCallback, type ReactNode } from 'react';
+import { useParams, useNavigate, useBlocker } from 'react-router-dom';
 import {
-  Card,
-  Form,
   Input,
   InputNumber,
-  Button,
   Select,
   Switch,
-  Space,
-  App,
-  Spin,
-  Divider,
-  Typography,
-  Row,
-  Col,
-  Table,
+  Button,
   Upload,
   Image,
+  App,
+  Spin,
+  Modal,
+  Space,
 } from 'antd';
-import {
-  AppstoreOutlined,
-  PlusOutlined,
-  DeleteOutlined,
-  LinkOutlined,
-  UploadOutlined,
-  LoadingOutlined,
-  PictureOutlined,
-} from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, PictureOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   itemsApi,
-  CreateItemPayload,
-  UpdateItemPayload,
-  ItemUnitItem,
+  type CreateItemPayload,
+  type UpdateItemPayload,
+  type ItemUnitItem,
 } from '@lib/api/endpoints/items';
-import { warehousesApi, WarehouseItem } from '@lib/api/endpoints/warehouses';
-import { itemGroupsApi, ItemGroupItem } from '@lib/api/endpoints/item-groups';
-import { unitsOfMeasureApi, UnitOfMeasureItem } from '@lib/api/endpoints/units-of-measure';
+import { warehousesApi, type WarehouseItem } from '@lib/api/endpoints/warehouses';
+import { itemGroupsApi, type ItemGroupItem } from '@lib/api/endpoints/item-groups';
+import { unitsOfMeasureApi, type UnitOfMeasureItem } from '@lib/api/endpoints/units-of-measure';
 import { uploadApi } from '@lib/api/endpoints/upload';
+import { Many2OneField } from '@components/Many2OneField/Many2OneField';
+import {
+  ErpForm,
+  ErpFormHeader,
+  ErpFormToolbar,
+  ErpFormTabs,
+  ErpFieldGrid,
+  ErpField,
+  ErpFormSidebar,
+} from '@components/Erp';
 
-const { Title } = Typography;
+interface UnitColumn {
+  title?: string;
+  key: string;
+  dataIndex?: string;
+  width?: number;
+  render?: (_: unknown, __: unknown, index: number) => ReactNode;
+}
+
+const itemFormSchema = z.object({
+  sku: z.string().min(1, 'SKU is required'),
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+  type: z.enum(['product', 'service']),
+  costPrice: z.number().min(0),
+  sellingPrice: z.number().min(0),
+  itemGroupId: z.string().optional(),
+  imageUrl: z.string().optional(),
+  reorderPoint: z.number().min(0),
+  reorderQuantity: z.number().min(0),
+  defaultWarehouseId: z.string().optional(),
+  isActive: z.boolean(),
+});
+
+type ItemFormValues = z.infer<typeof itemFormSchema>;
 
 export default function ItemFormPage() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { message } = App.useApp();
-  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [warehouses, setWarehouses] = useState<WarehouseItem[]>([]);
   const [itemGroups, setItemGroups] = useState<ItemGroupItem[]>([]);
   const [unitsOfMeasure, setUnitsOfMeasure] = useState<UnitOfMeasureItem[]>([]);
   const [unitRows, setUnitRows] = useState<ItemUnitItem[]>([]);
   const [uploading, setUploading] = useState(false);
-  const currentImage = Form.useWatch('imageUrl', form);
+  const [sectionTab, setSectionTab] = useState(
+    () => localStorage.getItem('itemFormActiveTab') || 'basic',
+  );
+
+  const handleTabChange = (key: string) => {
+    setSectionTab(key);
+    localStorage.setItem('itemFormActiveTab', key);
+  };
   const isEdit = Boolean(id);
+
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors, isDirty },
+    reset,
+  } = useForm<ItemFormValues>({
+    resolver: zodResolver(itemFormSchema),
+    defaultValues: {
+      sku: '',
+      name: '',
+      description: '',
+      type: 'product',
+      costPrice: 0,
+      sellingPrice: 0,
+      itemGroupId: undefined,
+      imageUrl: '',
+      reorderPoint: 0,
+      reorderQuantity: 0,
+      defaultWarehouseId: undefined,
+      isActive: true,
+    },
+  });
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      isDirty && currentLocation.pathname !== nextLocation.pathname,
+  );
+
+  const currentimageUrl = watch('imageUrl');
 
   useEffect(() => {
     const loadData = async () => {
@@ -73,7 +133,7 @@ export default function ItemFormPage() {
 
         if (id) {
           const item = await itemsApi.findById(id);
-          form.setFieldsValue({
+          reset({
             sku: item.sku,
             name: item.name,
             description: item.description || '',
@@ -90,13 +150,13 @@ export default function ItemFormPage() {
           setUnitRows(item.units || []);
         }
       } catch {
-        message.error(t('common.error'));
+        message.error(t('errors.loadError'));
       } finally {
         setLoading(false);
       }
     };
     void loadData();
-  }, [id, form, message, t]);
+  }, [id, reset, message, t]);
 
   const addUnitRow = () => {
     setUnitRows((prev) => [
@@ -113,29 +173,28 @@ export default function ItemFormPage() {
     ]);
   };
 
-  const removeUnitRow = (index: number) => {
+  const removeUnitRow = (index: number) =>
     setUnitRows((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const updateUnitRow = (index: number, field: string, value: unknown) => {
     setUnitRows((prev) => prev.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
   };
 
-  const onFinish = async (values: Record<string, unknown>) => {
+  const onSubmit = async (values: ItemFormValues) => {
     setSaving(true);
     try {
       const payload = {
-        sku: values.sku as string,
-        name: values.name as string,
-        description: (values.description as string) || undefined,
-        type: values.type as 'product' | 'service',
-        costPrice: values.costPrice as number,
-        sellingPrice: values.sellingPrice as number,
-        itemGroupId: (values.itemGroupId as string) || undefined,
-        imageUrl: (values.imageUrl as string) || undefined,
-        reorderPoint: (values.reorderPoint as number) || 0,
-        reorderQuantity: (values.reorderQuantity as number) || 0,
-        defaultWarehouseId: (values.defaultWarehouseId as string) || undefined,
+        sku: values.sku,
+        name: values.name,
+        description: values.description || undefined,
+        type: values.type,
+        costPrice: values.costPrice,
+        sellingPrice: values.sellingPrice,
+        itemGroupId: values.itemGroupId || undefined,
+        imageUrl: values.imageUrl || undefined,
+        reorderPoint: values.reorderPoint || 0,
+        reorderQuantity: values.reorderQuantity || 0,
+        defaultWarehouseId: values.defaultWarehouseId || undefined,
         units: unitRows.map((r) => ({
           unitId: r.unitId,
           conversionRate: r.conversionRate,
@@ -155,15 +214,23 @@ export default function ItemFormPage() {
       }
       navigate('/items');
     } catch {
-      message.error(t('common.error'));
+      message.error(t('errors.saveError'));
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <Spin style={{ display: 'block', margin: '64px auto' }} />;
+  const searchItemGroups = useCallback(async (query: string) => {
+    const result = await itemGroupsApi.findAll({ page: 1, limit: 20, search: query });
+    return result.data.map((g) => ({ value: g.id, label: `${g.code} - ${g.name}` }));
+  }, []);
 
-  const unitColumns = [
+  const searchWarehouses = useCallback(async (query: string) => {
+    const result = await warehousesApi.findAll({ page: 1, limit: 20, search: query });
+    return result.data.map((w) => ({ value: w.id, label: w.name }));
+  }, []);
+
+  const unitColumns: UnitColumn[] = [
     {
       title: t('items.unit'),
       dataIndex: 'unitId',
@@ -258,151 +325,103 @@ export default function ItemFormPage() {
     },
   ];
 
+  if (loading) return <Spin size="large" style={{ display: 'block', margin: '64px auto' }} />;
+
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
-      <Card
-        title={
-          <Space>
-            <span style={{ fontSize: 20, fontWeight: 600 }}>
-              {isEdit ? t('items.edit') : t('items.create')}
-            </span>
-          </Space>
-        }
-        style={{ borderRadius: 12 }}
-      >
-        <Form form={form} layout="vertical" onFinish={onFinish} scrollToFirstError>
-          <Title level={5} style={{ marginBottom: 16, color: 'rgba(0,0,0,0.65)' }}>
-            <AppstoreOutlined style={{ marginInlineEnd: 8 }} />
-            {t('items.basicInfo')}
-          </Title>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="sku"
-                label={t('items.sku')}
-                rules={[
-                  { required: true, message: t('validation.required', { field: t('items.sku') }) },
-                ]}
-              >
-                <Input style={{ textTransform: 'uppercase' }} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="type" label={t('items.type')}>
-                <Select
-                  options={[
-                    { value: 'product', label: t('items.product') },
-                    { value: 'service', label: t('items.service') },
-                  ]}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item
-            name="name"
-            label={t('items.name')}
-            rules={[
-              { required: true, message: t('validation.required', { field: t('items.name') }) },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item name="description" label={t('items.description')}>
-            <Input.TextArea rows={2} />
-          </Form.Item>
-
-          <Divider style={{ margin: '16px 0 20px' }} />
-          <Title level={5} style={{ marginBottom: 16, color: 'rgba(0,0,0,0.65)' }}>
-            <LinkOutlined style={{ marginInlineEnd: 8 }} />
-            {t('items.pricingAndGroup')}
-          </Title>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item name="itemGroupId" label={t('items.itemGroup')}>
-                <Select
-                  allowClear
-                  placeholder={t('common.noGroup')}
-                  options={itemGroups.map((g) => ({ value: g.id, label: `${g.code} - ${g.name}` }))}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item name="defaultWarehouseId" label={t('items.defaultWarehouse')}>
-                <Select
-                  allowClear
-                  placeholder={t('common.noGroup')}
-                  options={warehouses.map((w) => ({ value: w.id, label: w.name }))}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={4}>
-              <Form.Item name="costPrice" label={t('items.costPrice')}>
-                <InputNumber style={{ width: '100%' }} min={0} precision={2} />
-              </Form.Item>
-            </Col>
-            <Col span={4}>
-              <Form.Item name="sellingPrice" label={t('items.sellingPrice')}>
-                <InputNumber style={{ width: '100%' }} min={0} precision={2} />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Divider style={{ margin: '16px 0 20px' }} />
-          <Title level={5} style={{ marginBottom: 16, color: 'rgba(0,0,0,0.65)' }}>
-            {t('items.inventorySettings')}
-          </Title>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item name="reorderPoint" label={t('items.reorderPoint')}>
-                <InputNumber style={{ width: '100%' }} min={0} precision={0} />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item name="reorderQuantity" label={t('items.reorderQuantity')}>
-                <InputNumber style={{ width: '100%' }} min={0} precision={0} />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Divider style={{ margin: '16px 0 20px' }} />
-          <Title level={5} style={{ marginBottom: 16, color: 'rgba(0,0,0,0.65)' }}>
-            <PictureOutlined style={{ marginInlineEnd: 8 }} />
-            {t('items.image')}
-          </Title>
-          <Form.Item name="imageUrl" hidden>
-            <Input />
-          </Form.Item>
-          <Row gutter={16}>
-            <Col xs={24} sm={12} md={8}>
-              <div
-                style={{
-                  border: '1px dashed #d9d9d9',
-                  borderRadius: 8,
-                  padding: 8,
-                  textAlign: 'center',
-                  marginBottom: 12,
-                  background: '#fafafa',
-                  minHeight: 180,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                }}
-              >
-                {currentImage ? (
-                  <Image
-                    src={currentImage}
-                    style={{ maxWidth: '100%', maxHeight: 160, objectFit: 'contain' }}
-                    preview={false}
-                  />
-                ) : (
-                  <Space direction="vertical" size={2} style={{ color: '#bbb' }}>
-                    <PictureOutlined style={{ fontSize: 48 }} />
-                    <span style={{ fontSize: 12 }}>{t('items.noImage')}</span>
-                  </Space>
-                )}
+    <div className="erpnext-form">
+      <ErpFormHeader
+        title={isEdit ? t('items.edit') : t('items.create')}
+        onBack={() => navigate('/items')}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        sidebarOpen={sidebarOpen}
+      />
+      <ErpFormToolbar
+        status="draft"
+        saving={saving}
+        onSave={handleSubmit(onSubmit)}
+        onDiscard={() => navigate('/items')}
+      />
+      <ErpForm sidebar={<ErpFormSidebar />} sidebarOpen={sidebarOpen}>
+        <ErpFormTabs
+          tabs={[
+            { key: 'basic', label: t('items.basicInfo') },
+            { key: 'pricing', label: t('items.pricingAndGroup') },
+            { key: 'inventory', label: t('items.inventorySettings') },
+            { key: 'units', label: t('items.units') },
+          ]}
+          activeKey={sectionTab}
+          onChange={handleTabChange}
+        >
+          {sectionTab === 'basic' && (
+            <div style={{ display: 'flex', gap: 24, padding: 16 }}>
+              <div style={{ flex: 1 }}>
+                <ErpFieldGrid>
+                  <ErpField label={t('items.sku')} required>
+                    <Controller
+                      name="sku"
+                      control={control}
+                      render={({ field }) => (
+                        <div>
+                          <Input
+                            {...field}
+                            style={{ textTransform: 'uppercase' }}
+                            status={errors.sku ? 'error' : undefined}
+                          />
+                          {errors.sku && (
+                            <span style={{ color: '#ef4444', fontSize: 11 }}>
+                              {errors.sku.message}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    />
+                  </ErpField>
+                  <ErpField label={t('items.type')}>
+                    <Controller
+                      name="type"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          {...field}
+                          options={[
+                            { value: 'product', label: t('items.product') },
+                            { value: 'service', label: t('items.service') },
+                          ]}
+                        />
+                      )}
+                    />
+                  </ErpField>
+                  <ErpField label={t('items.name')} required>
+                    <Controller
+                      name="name"
+                      control={control}
+                      render={({ field }) => (
+                        <div>
+                          <Input {...field} status={errors.name ? 'error' : undefined} />
+                          {errors.name && (
+                            <span style={{ color: '#ef4444', fontSize: 11 }}>
+                              {errors.name.message}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    />
+                  </ErpField>
+                  <ErpField label={t('items.description')} fullWidth>
+                    <Controller
+                      name="description"
+                      control={control}
+                      render={({ field }) => <Input.TextArea {...field} rows={3} />}
+                    />
+                  </ErpField>
+                </ErpFieldGrid>
               </div>
-              <Space>
+              <div style={{ width: 180, flexShrink: 0 }}>
+                <Controller
+                  name="imageUrl"
+                  control={control}
+                  render={({ field }) => <Input {...field} hidden />}
+                />
                 <Upload
                   accept="image/jpeg,image/png,image/gif,image/webp"
                   showUploadList={false}
@@ -411,7 +430,7 @@ export default function ItemFormPage() {
                     uploadApi
                       .uploadItemImage(file)
                       .then((res) => {
-                        form.setFieldsValue({ imageUrl: res.url });
+                        reset((prev) => ({ ...prev, imageUrl: res.url }));
                         setUploading(false);
                       })
                       .catch(() => {
@@ -421,58 +440,197 @@ export default function ItemFormPage() {
                     return false;
                   }}
                 >
-                  <Button
-                    icon={uploading ? <LoadingOutlined /> : <UploadOutlined />}
-                    loading={uploading}
+                  <div
+                    style={{
+                      border: '1px dashed #e5e5e5',
+                      borderRadius: 6,
+                      padding: 4,
+                      textAlign: 'center',
+                      background: uploading ? '#fff' : '#fafafa',
+                      cursor: 'pointer',
+                      minHeight: 120,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                    }}
                   >
-                    {t('items.uploadImage')}
-                  </Button>
+                    {uploading ? (
+                      <Spin />
+                    ) : currentimageUrl ? (
+                      <Image
+                        src={currentimageUrl}
+                        style={{ maxWidth: '100%', maxHeight: 100, objectFit: 'contain' }}
+                        preview={false}
+                      />
+                    ) : (
+                      <Space direction="vertical" size={2} style={{ color: '#ccc' }}>
+                        <PictureOutlined style={{ fontSize: 32 }} />
+                        <span style={{ fontSize: 12 }}>{t('items.noImage')}</span>
+                        <span style={{ fontSize: 11, color: '#bbb', marginTop: 4 }}>
+                          {t('items.uploadImage')}
+                        </span>
+                      </Space>
+                    )}
+                  </div>
                 </Upload>
-                {currentImage && (
-                  <Button
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => form.setFieldsValue({ imageUrl: '' })}
-                  >
-                    {t('common.delete')}
-                  </Button>
+                {currentimageUrl && (
+                  <div style={{ textAlign: 'center', marginTop: 8 }}>
+                    <Button
+                      danger
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      onClick={() => reset((prev) => ({ ...prev, imageUrl: '' }))}
+                    >
+                      {t('common.remove')}
+                    </Button>
+                  </div>
                 )}
-              </Space>
-            </Col>
-          </Row>
-          {isEdit && (
-            <Form.Item name="isActive" label={t('common.status')} valuePropName="checked">
-              <Switch />
-            </Form.Item>
+              </div>
+            </div>
           )}
-
-          <Divider style={{ margin: '16px 0 20px' }} />
-          <Title level={5} style={{ marginBottom: 16, color: 'rgba(0,0,0,0.65)' }}>
-            {t('items.units')}
-          </Title>
-          <Table
-            dataSource={unitRows}
-            columns={unitColumns}
-            rowKey="id"
-            pagination={false}
-            size="small"
-            bordered
-            footer={() => (
-              <Button type="dashed" onClick={addUnitRow} icon={<PlusOutlined />} block>
-                {t('items.addUnit')}
-              </Button>
-            )}
-          />
-
-          <Divider style={{ margin: '20px 0 16px' }} />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <Button onClick={() => navigate('/items')}>{t('common.cancel')}</Button>
-            <Button type="primary" htmlType="submit" loading={saving}>
-              {t('common.save')}
-            </Button>
-          </div>
-        </Form>
-      </Card>
+          {sectionTab === 'pricing' && (
+            <ErpFieldGrid>
+              <ErpField label={t('items.itemGroup')}>
+                <Controller
+                  name="itemGroupId"
+                  control={control}
+                  render={({ field }) => (
+                    <Many2OneField
+                      value={field.value || undefined}
+                      onChange={(val) => field.onChange(val ?? undefined)}
+                      onSearch={searchItemGroups}
+                      options={itemGroups.map((g) => ({
+                        value: g.id,
+                        label: `${g.code} - ${g.name}`,
+                      }))}
+                      placeholder={t('items.selectItemGroup')}
+                    />
+                  )}
+                />
+              </ErpField>
+              <ErpField label={t('items.defaultWarehouse')}>
+                <Controller
+                  name="defaultWarehouseId"
+                  control={control}
+                  render={({ field }) => (
+                    <Many2OneField
+                      value={field.value || undefined}
+                      onChange={(val) => field.onChange(val ?? undefined)}
+                      onSearch={searchWarehouses}
+                      options={warehouses.map((w) => ({ value: w.id, label: w.name }))}
+                      placeholder={t('items.selectWarehouse')}
+                    />
+                  )}
+                />
+              </ErpField>
+              <ErpField label={t('items.costPrice')}>
+                <Controller
+                  name="costPrice"
+                  control={control}
+                  render={({ field }) => (
+                    <InputNumber {...field} style={{ width: '100%' }} min={0} precision={2} />
+                  )}
+                />
+              </ErpField>
+              <ErpField label={t('items.sellingPrice')}>
+                <Controller
+                  name="sellingPrice"
+                  control={control}
+                  render={({ field }) => (
+                    <InputNumber {...field} style={{ width: '100%' }} min={0} precision={2} />
+                  )}
+                />
+              </ErpField>
+            </ErpFieldGrid>
+          )}
+          {sectionTab === 'inventory' && (
+            <ErpFieldGrid>
+              <ErpField label={t('items.reorderPoint')}>
+                <Controller
+                  name="reorderPoint"
+                  control={control}
+                  render={({ field }) => (
+                    <InputNumber {...field} style={{ width: '100%' }} min={0} precision={0} />
+                  )}
+                />
+              </ErpField>
+              <ErpField label={t('items.reorderQuantity')}>
+                <Controller
+                  name="reorderQuantity"
+                  control={control}
+                  render={({ field }) => (
+                    <InputNumber {...field} style={{ width: '100%' }} min={0} precision={0} />
+                  )}
+                />
+              </ErpField>
+              {isEdit && (
+                <ErpField label={t('common.status')}>
+                  <Controller
+                    name="isActive"
+                    control={control}
+                    render={({ field: { value, onChange } }) => (
+                      <Switch checked={!!value} onChange={onChange} />
+                    )}
+                  />
+                </ErpField>
+              )}
+            </ErpFieldGrid>
+          )}
+          {sectionTab === 'units' && (
+            <div>
+              <table
+                className="erp-editable-table"
+                style={{ margin: 16, width: 'calc(100% - 32px)' }}
+              >
+                <thead>
+                  <tr>
+                    {unitColumns.map((col) => (
+                      <th key={col.key || col.dataIndex} style={{ width: col.width }}>
+                        {col.title}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {unitRows.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={unitColumns.length}
+                        style={{ textAlign: 'center', padding: 24, color: '#8d99a6' }}
+                      >
+                        {t('common.noData')}
+                      </td>
+                    </tr>
+                  )}
+                  {unitRows.map((row, index) => (
+                    <tr key={row.id}>
+                      {unitColumns.map((col) => (
+                        <td key={col.key || col.dataIndex}>{col.render?.(null, null, index)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div style={{ padding: '0 16px 16px' }}>
+                <Button type="dashed" onClick={addUnitRow} icon={<PlusOutlined />} block>
+                  {t('items.addUnit')}
+                </Button>
+              </div>
+            </div>
+          )}
+        </ErpFormTabs>
+      </ErpForm>
+      <Modal
+        title={t('common.unsavedChanges')}
+        open={blocker.state === 'blocked'}
+        onOk={blocker.proceed}
+        onCancel={blocker.reset}
+        okText={t('common.leave')}
+        cancelText={t('common.stay')}
+      >
+        {t('common.unsavedChangesMessage')}
+      </Modal>
     </div>
   );
 }

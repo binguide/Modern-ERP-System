@@ -41,6 +41,13 @@ export const paginationSchema = z.object({
 });
 export type PaginationInput = z.infer<typeof paginationSchema>;
 
+export const updateProfileSchema = z.object({
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
+  phone: z.string().max(30).nullable().optional(),
+});
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
 export const createUserSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
@@ -86,3 +93,105 @@ export const createRoleSchema = z.object({
     .default([]),
 });
 export type CreateRoleInput = z.infer<typeof createRoleSchema>;
+
+export const updateRoleSchema = createRoleSchema.partial();
+export type UpdateRoleInput = z.infer<typeof updateRoleSchema>;
+
+export const branchSchema = z.object({
+  name: z.string().min(2),
+  code: z.string().min(2),
+  isDefault: z.boolean().optional(),
+  isActive: z.boolean().optional(),
+});
+export type BranchInput = z.infer<typeof branchSchema>;
+
+export const customerSchema = z.object({
+  code: z.string().min(1),
+  name: z.string().min(1),
+  phone: z.string().optional(),
+  email: emailSchema.optional().or(z.literal('')),
+  address: z.string().optional(),
+  taxId: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
+export type CustomerInput = z.infer<typeof customerSchema>;
+
+export const accountTypeEnum = z.enum([
+  'asset',
+  'liability',
+  'equity',
+  'income',
+  'expense',
+  'contra_asset',
+  'contra_liability',
+  'contra_equity',
+  'contra_income',
+  'contra_expense',
+]);
+
+export const accountSchema = z.object({
+  code: z.string().min(1),
+  name: z.string().min(1),
+  nameEn: z.string().optional(),
+  type: accountTypeEnum,
+  parentId: idSchema.optional(),
+  isActive: z.boolean().optional(),
+  openingBalance: z.number().optional(),
+});
+export type AccountInput = z.infer<typeof accountSchema>;
+
+export const fiscalYearSchema = z.object({
+  code: z.string().min(1),
+  startDate: z.string().min(1),
+  endDate: z.string().min(1),
+  isDefault: z.boolean().optional(),
+  isClosed: z.boolean().optional(),
+});
+export type FiscalYearInput = z.infer<typeof fiscalYearSchema>;
+
+export const itemGroupSchema = z.object({
+  code: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
+export type ItemGroupInput = z.infer<typeof itemGroupSchema>;
+
+export const taxSchema = z.object({
+  code: z.string().min(1),
+  name: z.string().min(1),
+  rate: z.number().min(0),
+  type: z.enum(['percentage', 'fixed']).optional(),
+  isActive: z.boolean().optional(),
+  isDefault: z.boolean().optional(),
+});
+export type TaxInput = z.infer<typeof taxSchema>;
+
+export const unitOfMeasureSchema = z.object({
+  code: z.string().min(1),
+  name: z.string().min(1),
+  isActive: z.boolean().optional(),
+});
+export type UnitOfMeasureInput = z.infer<typeof unitOfMeasureSchema>;
+
+export const warehouseSchema = z.object({
+  code: z.string().min(1),
+  name: z.string().min(1),
+  address: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
+export type WarehouseInput = z.infer<typeof warehouseSchema>;
+
+export const itemSchema = z.object({
+  code: z.string().min(1),
+  name: z.string().min(1),
+  nameEn: z.string().optional(),
+  description: z.string().optional(),
+  itemGroupId: idSchema.optional(),
+  unitOfMeasureId: idSchema.optional(),
+  type: z.enum(['product', 'service']).optional(),
+  cost: z.number().min(0).optional(),
+  price: z.number().min(0).optional(),
+  isActive: z.boolean().optional(),
+});
+export type ItemInput = z.infer<typeof itemSchema>;

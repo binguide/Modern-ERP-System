@@ -26,7 +26,12 @@ async function bootstrap() {
   // CORS
   const webUrl = config.get<string>('WEB_URL');
   app.enableCors({
-    origin: [webUrl, 'http://localhost:5173', 'http://localhost:5180'].filter(Boolean) as string[],
+    origin: [
+      webUrl,
+      'http://localhost:5173',
+      'http://localhost:5180',
+      'http://localhost:5185',
+    ].filter(Boolean) as string[],
     credentials: true,
   });
 

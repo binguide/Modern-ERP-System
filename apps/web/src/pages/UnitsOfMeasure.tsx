@@ -1,8 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Modal, Form, Input, Switch, Button, App } from 'antd';
+import { Modal, Input, Switch, Button, App, Form } from 'antd';
 import { ZoomInOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { unitOfMeasureSchema, type UnitOfMeasureInput } from '@modern-erp/shared-schemas';
 import { unitsOfMeasureApi, UnitOfMeasureItem } from '@lib/api/endpoints/units-of-measure';
+import { FormField } from '@components/FormField';
 import { OdooTag } from '@components/OdooTag/OdooTag';
 import { DataGrid, useDataGrid } from '@components/DataGrid';
 
@@ -12,7 +16,16 @@ export default function UnitsOfMeasurePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<UnitOfMeasureItem | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form] = Form.useForm();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<UnitOfMeasureInput>({
+    resolver: zodResolver(unitOfMeasureSchema),
+    defaultValues: { code: '', name: '', isActive: true },
+  });
 
   const grid = useDataGrid<UnitOfMeasureItem>({
     fetchFn: (params) => unitsOfMeasureApi.findAll(params as Record<string, unknown>),
@@ -22,17 +35,17 @@ export default function UnitsOfMeasurePage() {
 
   const openCreate = useCallback(() => {
     setEditing(null);
-    form.resetFields();
+    reset({ code: '', name: '', isActive: true });
     setModalOpen(true);
-  }, [form]);
+  }, [reset]);
 
   const openEdit = useCallback(
     (item: UnitOfMeasureItem) => {
       setEditing(item);
-      form.setFieldsValue(item);
+      reset({ code: item.code, name: item.name, isActive: item.isActive });
       setModalOpen(true);
     },
-    [form],
+    [reset],
   );
 
   const handleDeleteSelected = useCallback(
@@ -52,14 +65,14 @@ export default function UnitsOfMeasurePage() {
     [message, t, grid],
   );
 
-  const onFinish = async (values: Record<string, unknown>) => {
+  const onSubmit = async (values: UnitOfMeasureInput) => {
     setSaving(true);
     try {
       if (editing) {
-        await unitsOfMeasureApi.update(editing.id, values as unknown);
+        await unitsOfMeasureApi.update(editing.id, values);
         message.success(t('common.updated'));
       } else {
-        await unitsOfMeasureApi.create(values as unknown);
+        await unitsOfMeasureApi.create(values);
         message.success(t('common.created'));
       }
       setModalOpen(false);
@@ -94,7 +107,7 @@ export default function UnitsOfMeasurePage() {
   ];
 
   return (
-    <>
+    <div className="erpnext-list">
       <DataGrid<UnitOfMeasureItem>
         {...grid}
         title={t('menu.unitsOfMeasure')}
@@ -118,44 +131,40 @@ export default function UnitsOfMeasurePage() {
         footer={null}
         width={480}
       >
-        <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <FormField<UnitOfMeasureInput>
+            control={control}
             name="code"
             label={t('unitsOfMeasure.code')}
-            rules={[
-              {
-                required: true,
-                message: t('validation.required', { field: t('unitsOfMeasure.code') }),
-              },
-            ]}
-          >
-            <Input style={{ textTransform: 'uppercase' }} />
-          </Form.Item>
-          <Form.Item
-            name="name"
-            label={t('unitsOfMeasure.name')}
-            rules={[
-              {
-                required: true,
-                message: t('validation.required', { field: t('unitsOfMeasure.name') }),
-              },
-            ]}
+            errors={errors}
           >
             <Input />
-          </Form.Item>
-          {editing && (
-            <Form.Item name="isActive" label={t('common.status')} valuePropName="checked">
-              <Switch />
-            </Form.Item>
-          )}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+          </FormField>
+          <FormField<UnitOfMeasureInput>
+            control={control}
+            name="name"
+            label={t('unitsOfMeasure.name')}
+            errors={errors}
+          >
+            <Input />
+          </FormField>
+          <Controller
+            name="isActive"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <Form.Item label={t('common.status')}>
+                <Switch checked={!!value} onChange={onChange} />
+              </Form.Item>
+            )}
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
             <Button onClick={() => setModalOpen(false)}>{t('common.cancel')}</Button>
             <Button type="primary" htmlType="submit" loading={saving}>
               {t('common.save')}
             </Button>
           </div>
-        </Form>
+        </form>
       </Modal>
-    </>
+    </div>
   );
 }

@@ -4,7 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
-    "module": "commonjs",
+    "module": "ESNext",
     "moduleResolution": "Node",
     "target": "ES2022"
   },

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
   Card,
-  Form,
   Input,
   Button,
   Space,
@@ -12,42 +11,77 @@ import {
   Col,
   Avatar,
   Descriptions,
+  Form,
 } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { useForm, Controller } from 'react-hook-form';
 import { useAuthStore } from '@stores/authStore';
 import { authApi } from '@lib/api/endpoints/auth';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
 
+interface ProfileFormValues {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}
+
+interface PasswordFormValues {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export default function ProfilePage() {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const { user, updateProfile } = useAuthStore();
-  const [profileForm] = Form.useForm();
-  const [passwordForm] = Form.useForm();
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
 
+  const {
+    control: profileControl,
+    handleSubmit: handleProfileSubmit,
+    formState: { errors: profileErrors },
+    reset: resetProfile,
+  } = useForm<ProfileFormValues>({
+    defaultValues: { firstName: '', lastName: '', email: '', phone: '' },
+  });
+
+  const {
+    control: passwordControl,
+    handleSubmit: handlePasswordSubmit,
+    formState: { errors: passwordErrors },
+    reset: resetPassword,
+  } = useForm<PasswordFormValues>({
+    defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
+  });
+
   useEffect(() => {
     if (user) {
-      profileForm.setFieldsValue({
+      resetProfile({
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
         phone: user.phone || '',
       });
     }
-  }, [user, profileForm]);
+  }, [user, resetProfile]);
 
-  const onSaveProfile = async (values: Record<string, unknown>) => {
+  const onSaveProfile = async (values: ProfileFormValues) => {
+    if (!values.firstName || !values.lastName) {
+      message.error(t('validation.required', { field: '' }));
+      return;
+    }
     setSavingProfile(true);
     try {
       await updateProfile({
-        firstName: values.firstName as string,
-        lastName: values.lastName as string,
-        phone: (values.phone as string) || null,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        phone: values.phone || null,
       });
       message.success(t('common.updated'));
     } catch {
@@ -57,12 +91,20 @@ export default function ProfilePage() {
     }
   };
 
-  const onChangePassword = async (values: Record<string, unknown>) => {
+  const onChangePassword = async (values: PasswordFormValues) => {
+    if (values.newPassword.length < 8) {
+      message.error(t('validation.minLength', { min: 8 }));
+      return;
+    }
+    if (values.newPassword !== values.confirmPassword) {
+      message.error(t('validation.passwordsMismatch'));
+      return;
+    }
     setSavingPassword(true);
     try {
-      await authApi.changePassword(values.currentPassword as string, values.newPassword as string);
+      await authApi.changePassword(values.currentPassword, values.newPassword);
       message.success(t('auth.passwordChanged'));
-      passwordForm.resetFields();
+      resetPassword();
     } catch {
       message.error(t('common.error'));
     } finally {
@@ -105,49 +147,65 @@ export default function ProfilePage() {
         }
         style={{ marginBottom: 24, borderRadius: 12 }}
       >
-        <Form form={profileForm} layout="vertical" onFinish={onSaveProfile}>
+        <form onSubmit={handleProfileSubmit(onSaveProfile)}>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item
+              <Controller
                 name="firstName"
-                label={t('user.firstName')}
-                rules={[
-                  {
-                    required: true,
-                    message: t('validation.required', { field: t('user.firstName') }),
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
+                control={profileControl}
+                render={({ field }) => (
+                  <Form.Item
+                    label={t('user.firstName')}
+                    validateStatus={profileErrors.firstName ? 'error' : undefined}
+                    help={profileErrors.firstName?.message}
+                    required
+                  >
+                    <Input {...field} />
+                  </Form.Item>
+                )}
+              />
             </Col>
             <Col span={12}>
-              <Form.Item
+              <Controller
                 name="lastName"
-                label={t('user.lastName')}
-                rules={[
-                  {
-                    required: true,
-                    message: t('validation.required', { field: t('user.lastName') }),
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
+                control={profileControl}
+                render={({ field }) => (
+                  <Form.Item
+                    label={t('user.lastName')}
+                    validateStatus={profileErrors.lastName ? 'error' : undefined}
+                    help={profileErrors.lastName?.message}
+                    required
+                  >
+                    <Input {...field} />
+                  </Form.Item>
+                )}
+              />
             </Col>
           </Row>
-          <Form.Item name="email" label={t('auth.email')}>
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="phone" label={t('user.phone')}>
-            <Input />
-          </Form.Item>
+          <Controller
+            name="email"
+            control={profileControl}
+            render={({ field }) => (
+              <Form.Item label={t('auth.email')}>
+                <Input {...field} disabled />
+              </Form.Item>
+            )}
+          />
+          <Controller
+            name="phone"
+            control={profileControl}
+            render={({ field }) => (
+              <Form.Item label={t('user.phone')}>
+                <Input {...field} />
+              </Form.Item>
+            )}
+          />
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button type="primary" htmlType="submit" loading={savingProfile}>
               {t('common.save')}
             </Button>
           </div>
-        </Form>
+        </form>
       </Card>
 
       <Card
@@ -159,57 +217,55 @@ export default function ProfilePage() {
         }
         style={{ borderRadius: 12 }}
       >
-        <Form form={passwordForm} layout="vertical" onFinish={onChangePassword}>
-          <Form.Item
+        <form onSubmit={handlePasswordSubmit(onChangePassword)}>
+          <Controller
             name="currentPassword"
-            label={t('auth.oldPassword')}
-            rules={[
-              {
-                required: true,
-                message: t('validation.required', { field: t('auth.oldPassword') }),
-              },
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item
+            control={passwordControl}
+            render={({ field }) => (
+              <Form.Item
+                label={t('auth.oldPassword')}
+                validateStatus={passwordErrors.currentPassword ? 'error' : undefined}
+                help={passwordErrors.currentPassword?.message}
+                required
+              >
+                <Input.Password {...field} />
+              </Form.Item>
+            )}
+          />
+          <Controller
             name="newPassword"
-            label={t('auth.newPassword')}
-            rules={[
-              {
-                required: true,
-                message: t('validation.required', { field: t('auth.newPassword') }),
-              },
-              { min: 8, message: t('validation.minLength', { min: 8 }) },
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item
+            control={passwordControl}
+            render={({ field }) => (
+              <Form.Item
+                label={t('auth.newPassword')}
+                validateStatus={passwordErrors.newPassword ? 'error' : undefined}
+                help={passwordErrors.newPassword?.message}
+                required
+              >
+                <Input.Password {...field} />
+              </Form.Item>
+            )}
+          />
+          <Controller
             name="confirmPassword"
-            label={t('auth.confirmPassword')}
-            dependencies={['newPassword']}
-            rules={[
-              {
-                required: true,
-                message: t('validation.required', { field: t('auth.confirmPassword') }),
-              },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue('newPassword') === value) return Promise.resolve();
-                  return Promise.reject(new Error(t('validation.passwordsMismatch')));
-                },
-              }),
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
+            control={passwordControl}
+            render={({ field }) => (
+              <Form.Item
+                label={t('auth.confirmPassword')}
+                validateStatus={passwordErrors.confirmPassword ? 'error' : undefined}
+                help={passwordErrors.confirmPassword?.message}
+                required
+              >
+                <Input.Password {...field} />
+              </Form.Item>
+            )}
+          />
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button type="primary" htmlType="submit" loading={savingPassword}>
               {t('auth.changePassword')}
             </Button>
           </div>
-        </Form>
+        </form>
       </Card>
     </div>
   );

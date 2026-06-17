@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
+import type { TreeDataNode } from 'antd';
 import {
   Modal,
-  Form,
   Input,
   Select,
   InputNumber,
@@ -14,12 +14,16 @@ import {
 } from 'antd';
 import { BookOutlined, PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { accountSchema, accountTypeEnum, type AccountInput } from '@modern-erp/shared-schemas';
 import { accountsApi, AccountItem } from '@lib/api/endpoints/accounts';
 import { OdooTag } from '@components/OdooTag/OdooTag';
+import { FormField } from '@components/FormField';
 
 const { Text } = Typography;
 
-const ACCOUNT_TYPES = ['asset', 'liability', 'equity', 'income', 'expense'];
+const ACCOUNT_TYPES = accountTypeEnum.options;
 
 export default function ChartOfAccountsPage() {
   const { t } = useTranslation();
@@ -30,7 +34,16 @@ export default function ChartOfAccountsPage() {
   const [editing, setEditing] = useState<AccountItem | null>(null);
   const [saving, setSaving] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-  const [form] = Form.useForm();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<AccountInput>({
+    resolver: zodResolver(accountSchema),
+    defaultValues: { code: '', name: '', type: 'asset', isActive: true, openingBalance: 0 },
+  });
 
   const fetchAccounts = useCallback(async () => {
     try {
@@ -49,21 +62,47 @@ export default function ChartOfAccountsPage() {
   const openCreate = useCallback(
     (parentId?: string) => {
       setEditing(null);
-      form.resetFields();
-      if (parentId) form.setFieldValue('parentId', parentId);
+      reset({
+        code: '',
+        name: '',
+        type: 'asset',
+        isActive: true,
+        openingBalance: 0,
+        parentId: parentId ?? undefined,
+      });
       setModalOpen(true);
     },
-    [form],
+    [reset],
   );
 
-  const onFinish = async (values: Record<string, unknown>) => {
+  const openEdit = useCallback(
+    (account: AccountItem) => {
+      setEditing(account);
+      reset({
+        code: account.code,
+        name: account.name,
+        type: account.type,
+        isActive: account.isActive,
+        openingBalance: Number(account.openingBalance ?? 0),
+        parentId: account.parentId ?? undefined,
+      });
+      setModalOpen(true);
+    },
+    [reset],
+  );
+
+  useEffect(() => {
+    if (!modalOpen) setEditing(null);
+  }, [modalOpen]);
+
+  const onSubmit = async (values: AccountInput) => {
     setSaving(true);
     try {
       if (editing) {
-        await accountsApi.update(editing.id, values as unknown);
+        await accountsApi.update(editing.id, values);
         message.success(t('common.updated'));
       } else {
-        await accountsApi.create(values as unknown);
+        await accountsApi.create(values);
         message.success(t('common.created'));
       }
       setModalOpen(false);
@@ -75,15 +114,11 @@ export default function ChartOfAccountsPage() {
     }
   };
 
-  useEffect(() => {
-    if (!modalOpen) setEditing(null);
-  }, [modalOpen]);
-
-  const renderTreeNodes = (items: AccountItem[]): unknown[] =>
+  const renderTreeNodes = (items: AccountItem[]): TreeDataNode[] =>
     items.map((item) => ({
       key: item.id,
       title: (
-        <Space size={4}>
+        <Space size={4} style={{ cursor: 'pointer' }} onClick={() => openEdit(item)}>
           <Text strong style={{ fontSize: 12, color: '#888', fontFamily: 'monospace' }}>
             {item.code}
           </Text>
@@ -109,7 +144,7 @@ export default function ChartOfAccountsPage() {
     .map((a) => ({ value: a.id, label: `${a.code} - ${a.name}` }));
 
   return (
-    <div>
+    <div className="erpnext-list">
       <Card
         title={
           <Space>
@@ -142,49 +177,56 @@ export default function ChartOfAccountsPage() {
         footer={null}
         width={520}
       >
-        <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <FormField<AccountInput>
+            control={control}
             name="code"
             label={t('accounts.code')}
-            rules={[
-              { required: true, message: t('validation.required', { field: t('accounts.code') }) },
-            ]}
+            errors={errors}
           >
             <Input style={{ textTransform: 'uppercase' }} />
-          </Form.Item>
-          <Form.Item
+          </FormField>
+          <FormField<AccountInput>
+            control={control}
             name="name"
             label={t('accounts.name')}
-            rules={[
-              { required: true, message: t('validation.required', { field: t('accounts.name') }) },
-            ]}
+            errors={errors}
           >
             <Input />
-          </Form.Item>
-          <Form.Item
+          </FormField>
+          <FormField<AccountInput>
+            control={control}
             name="type"
             label={t('accounts.type')}
-            rules={[
-              { required: true, message: t('validation.required', { field: t('accounts.type') }) },
-            ]}
+            errors={errors}
           >
             <Select
               options={ACCOUNT_TYPES.map((type) => ({ value: type, label: t(`accounts.${type}`) }))}
             />
-          </Form.Item>
-          <Form.Item name="parentId" label={t('accounts.parent')}>
+          </FormField>
+          <FormField<AccountInput>
+            control={control}
+            name="parentId"
+            label={t('accounts.parent')}
+            errors={errors}
+          >
             <Select allowClear placeholder={t('accounts.noParent')} options={parentOptions} />
-          </Form.Item>
-          <Form.Item name="openingBalance" label={t('accounts.openingBalance')}>
+          </FormField>
+          <FormField<AccountInput>
+            control={control}
+            name="openingBalance"
+            label={t('accounts.openingBalance')}
+            errors={errors}
+          >
             <InputNumber style={{ width: '100%' }} min={0} />
-          </Form.Item>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+          </FormField>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
             <Button onClick={() => setModalOpen(false)}>{t('common.cancel')}</Button>
             <Button type="primary" htmlType="submit" loading={saving}>
               {t('common.save')}
             </Button>
           </div>
-        </Form>
+        </form>
       </Modal>
     </div>
   );

@@ -1,17 +1,16 @@
-import { Button, Card, Form, Input, Space, Typography, App } from 'antd';
+import { Button, Input, Typography, App, Card, theme } from 'antd';
 import { LockOutlined, MailOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, type LoginInput } from '@modern-erp/shared-schemas';
 import { useAuthStore } from '@stores/authStore';
 import { PublicOnlyRoute } from '@components/ProtectedRoute/ProtectedRoute';
+import { FormField } from '@components/FormField';
 
 const { Title, Text } = Typography;
-
-interface LoginFormValues {
-  email: string;
-  password: string;
-}
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -19,13 +18,22 @@ export default function LoginPage() {
   const location = useLocation();
   const { login } = useAuthStore();
   const { message } = App.useApp();
+  const { token } = theme.useToken();
   const [loading, setLoading] = useState(false);
-  const [form] = Form.useForm<LoginFormValues>();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: 'admin@modern-erp.com', password: 'admin123' },
+  });
 
   const from =
     (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/dashboard';
 
-  const onFinish = async (values: LoginFormValues) => {
+  const onSubmit = async (values: LoginInput) => {
     setLoading(true);
     try {
       await login(values);
@@ -46,33 +54,26 @@ export default function LoginPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #312e81 0%, #4f46e5 50%, #6366f1 100%)',
+          background: token.colorBgLayout,
           padding: 24,
         }}
       >
-        <Card
-          style={{
-            width: 420,
-            borderRadius: 16,
-            boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 4px 20px rgba(79,70,229,0.1)',
-          }}
-        >
-          <Space direction="vertical" style={{ width: '100%' }}>
-            <div style={{ textAlign: 'center' }}>
+        <div style={{ maxWidth: 440, width: '100%' }}>
+          <Card style={{ padding: 8 }}>
+            <div style={{ textAlign: 'center', marginBottom: 32 }}>
               <div
                 style={{
                   width: 56,
                   height: 56,
-                  borderRadius: 14,
-                  background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
+                  borderRadius: token.borderRadiusLG,
+                  background: token.colorPrimary,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  margin: '0 auto 16px',
-                  boxShadow: '0 4px 12px rgba(79,70,229,0.3)',
+                  margin: '0 auto 20px',
                 }}
               >
-                <SafetyCertificateOutlined style={{ fontSize: 28, color: '#fff' }} />
+                <SafetyCertificateOutlined style={{ fontSize: 26, color: '#fff' }} />
               </div>
               <Title level={3} style={{ marginBottom: 4 }}>
                 {t('app.name')}
@@ -82,51 +83,65 @@ export default function LoginPage() {
               </Text>
             </div>
 
-            <Form<LoginFormValues>
-              form={form}
-              layout="vertical"
-              onFinish={onFinish}
-              initialValues={{ email: 'admin@modern-erp.com', password: 'admin123' }}
-              autoComplete="off"
-            >
-              <Form.Item
-                name="email"
-                label={t('auth.email')}
-                rules={[
-                  { required: true, message: t('validation.required', { field: t('auth.email') }) },
-                  { type: 'email', message: t('validation.email') },
-                ]}
-              >
-                <Input prefix={<MailOutlined />} placeholder="email@example.com" />
-              </Form.Item>
-
-              <Form.Item
-                name="password"
-                label={t('auth.password')}
-                rules={[
-                  {
-                    required: true,
-                    message: t('validation.required', { field: t('auth.password') }),
-                  },
-                ]}
-              >
-                <Input.Password prefix={<LockOutlined />} placeholder="••••••••" />
-              </Form.Item>
-
-              <Form.Item style={{ marginBottom: 0 }}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  block
-                  loading={loading}
-                  style={{ borderRadius: 10, fontWeight: 500 }}
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div style={{ marginBottom: 20 }}>
+                <Text
+                  style={{
+                    display: 'block',
+                    marginBottom: 8,
+                    color: token.colorTextSecondary,
+                    fontSize: 13,
+                    fontWeight: 500,
+                  }}
                 >
-                  {t('auth.login')}
-                </Button>
-              </Form.Item>
-            </Form>
-          </Space>
-        </Card>
+                  {t('auth.email')}
+                </Text>
+                <FormField<LoginInput> control={control} name="email" label="" errors={errors}>
+                  <Input prefix={<MailOutlined />} placeholder="email@example.com" size="large" />
+                </FormField>
+              </div>
+
+              <div style={{ marginBottom: 8 }}>
+                <Text
+                  style={{
+                    display: 'block',
+                    marginBottom: 8,
+                    color: token.colorTextSecondary,
+                    fontSize: 13,
+                    fontWeight: 500,
+                  }}
+                >
+                  {t('auth.password')}
+                </Text>
+                <FormField<LoginInput> control={control} name="password" label="" errors={errors}>
+                  <Input.Password prefix={<LockOutlined />} placeholder="••••••••" size="large" />
+                </FormField>
+              </div>
+
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={loading}
+                size="large"
+                style={{ marginTop: 24 }}
+              >
+                {t('auth.login')}
+              </Button>
+            </form>
+          </Card>
+          <Text
+            type="secondary"
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              marginTop: 24,
+              fontSize: 12,
+            }}
+          >
+            Modern ERP System &copy; {new Date().getFullYear()}
+          </Text>
+        </div>
       </div>
     </PublicOnlyRoute>
   );

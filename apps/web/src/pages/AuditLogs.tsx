@@ -101,40 +101,42 @@ export default function AuditLogsPage() {
   };
 
   return (
-    <DataGrid<AuditLogEntry>
-      {...grid}
-      title={t('menu.auditLogs')}
-      icon={<HistoryOutlined />}
-      columns={columns}
-      columnLabels={[
-        { key: 'createdAt', label: t('auditLogs.date') },
-        { key: 'action', label: t('auditLogs.action') },
-        { key: 'resource', label: t('auditLogs.resource') },
-        { key: 'resourceId', label: t('auditLogs.resourceId') },
-        { key: 'userId', label: t('auditLogs.userId') },
-        { key: 'ipAddress', label: t('auditLogs.ipAddress') },
-        { key: 'details', label: t('auditLogs.details') },
-      ]}
-      basePath="audit-logs"
-      search={false}
-      create={false}
-      deleteSelected={false}
-      rowClick={false}
-      emptyCreate={false}
-      toolbarExtra={
-        <Select
-          allowClear
-          placeholder={t('auditLogs.filterResource')}
-          style={{ width: 160 }}
-          value={grid.params.resource as string | undefined}
-          onChange={handleResourceFilter}
-        >
-          <Select.Option value="User">User</Select.Option>
-          <Select.Option value="Role">Role</Select.Option>
-          <Select.Option value="Branch">Branch</Select.Option>
-          <Select.Option value="Company">Company</Select.Option>
-        </Select>
-      }
-    />
+    <div className="erpnext-list">
+      <DataGrid<AuditLogEntry>
+        {...grid}
+        title={t('menu.auditLogs')}
+        icon={<HistoryOutlined />}
+        columns={columns}
+        columnLabels={[
+          { key: 'createdAt', label: t('auditLogs.date') },
+          { key: 'action', label: t('auditLogs.action') },
+          { key: 'resource', label: t('auditLogs.resource') },
+          { key: 'resourceId', label: t('auditLogs.resourceId') },
+          { key: 'userId', label: t('auditLogs.userId') },
+          { key: 'ipAddress', label: t('auditLogs.ipAddress') },
+          { key: 'details', label: t('auditLogs.details') },
+        ]}
+        basePath="audit-logs"
+        search={false}
+        create={false}
+        deleteSelected={false}
+        rowClick={false}
+        emptyCreate={false}
+        toolbarExtra={
+          <Select
+            allowClear
+            placeholder={t('auditLogs.filterResource')}
+            style={{ width: 160 }}
+            value={grid.params.resource as string | undefined}
+            onChange={handleResourceFilter}
+          >
+            <Select.Option value="User">User</Select.Option>
+            <Select.Option value="Role">Role</Select.Option>
+            <Select.Option value="Branch">Branch</Select.Option>
+            <Select.Option value="Company">Company</Select.Option>
+          </Select>
+        }
+      />
+    </div>
   );
 }

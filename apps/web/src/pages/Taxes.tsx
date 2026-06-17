@@ -1,8 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, Select, Switch, Button, App } from 'antd';
+import { Modal, Input, InputNumber, Select, Switch, Button, App, Form } from 'antd';
 import { PercentageOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { taxSchema, type TaxInput } from '@modern-erp/shared-schemas';
 import { taxesApi, TaxItem } from '@lib/api/endpoints/taxes';
+import { FormField } from '@components/FormField';
 import { OdooTag } from '@components/OdooTag/OdooTag';
 import { DataGrid, useDataGrid } from '@components/DataGrid';
 
@@ -12,7 +16,23 @@ export default function TaxesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<TaxItem | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form] = Form.useForm();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<TaxInput>({
+    resolver: zodResolver(taxSchema),
+    defaultValues: {
+      code: '',
+      name: '',
+      rate: 0,
+      type: 'percentage',
+      isDefault: false,
+      isActive: true,
+    },
+  });
 
   const grid = useDataGrid<TaxItem>({
     fetchFn: (params) => taxesApi.findAll(params as Record<string, unknown>),
@@ -22,17 +42,24 @@ export default function TaxesPage() {
 
   const openCreate = useCallback(() => {
     setEditing(null);
-    form.resetFields();
+    reset({ code: '', name: '', rate: 0, type: 'percentage', isDefault: false, isActive: true });
     setModalOpen(true);
-  }, [form]);
+  }, [reset]);
 
   const openEdit = useCallback(
     (tax: TaxItem) => {
       setEditing(tax);
-      form.setFieldsValue(tax);
+      reset({
+        code: tax.code,
+        name: tax.name,
+        rate: tax.rate,
+        type: tax.type ?? 'percentage',
+        isDefault: tax.isDefault,
+        isActive: tax.isActive,
+      });
       setModalOpen(true);
     },
-    [form],
+    [reset],
   );
 
   const handleDeleteSelected = useCallback(
@@ -52,14 +79,14 @@ export default function TaxesPage() {
     [message, t, grid],
   );
 
-  const onFinish = async (values: Record<string, unknown>) => {
+  const onSubmit = async (values: TaxInput) => {
     setSaving(true);
     try {
       if (editing) {
-        await taxesApi.update(editing.id, values as unknown);
+        await taxesApi.update(editing.id, values);
         message.success(t('common.updated'));
       } else {
-        await taxesApi.create(values as unknown);
+        await taxesApi.create(values);
         message.success(t('common.created'));
       }
       setModalOpen(false);
@@ -115,7 +142,7 @@ export default function TaxesPage() {
   ];
 
   return (
-    <>
+    <div className="erpnext-list">
       <DataGrid<TaxItem>
         {...grid}
         title={t('menu.taxes')}
@@ -142,58 +169,72 @@ export default function TaxesPage() {
         footer={null}
         width={480}
       >
-        <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <FormField<TaxInput>
+            control={control}
             name="code"
             label={t('taxes.code')}
-            rules={[
-              { required: true, message: t('validation.required', { field: t('taxes.code') }) },
-            ]}
+            errors={errors}
           >
             <Input style={{ textTransform: 'uppercase' }} />
-          </Form.Item>
-          <Form.Item
+          </FormField>
+          <FormField<TaxInput>
+            control={control}
             name="name"
             label={t('taxes.name')}
-            rules={[
-              { required: true, message: t('validation.required', { field: t('taxes.name') }) },
-            ]}
+            errors={errors}
           >
             <Input />
-          </Form.Item>
-          <Form.Item
+          </FormField>
+          <FormField<TaxInput>
+            control={control}
             name="rate"
             label={t('taxes.rate')}
-            rules={[
-              { required: true, message: t('validation.required', { field: t('taxes.rate') }) },
-            ]}
+            errors={errors}
           >
             <InputNumber style={{ width: '100%' }} min={0} max={100} />
-          </Form.Item>
-          <Form.Item name="type" label={t('taxes.type')}>
+          </FormField>
+          <FormField<TaxInput>
+            control={control}
+            name="type"
+            label={t('taxes.type')}
+            errors={errors}
+          >
             <Select
               options={[
                 { value: 'percentage', label: t('taxes.percentage') },
                 { value: 'fixed', label: t('taxes.fixed') },
               ]}
             />
-          </Form.Item>
-          <Form.Item name="isDefault" label={t('taxes.default')} valuePropName="checked">
-            <Switch />
-          </Form.Item>
+          </FormField>
+          <Controller
+            name="isDefault"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <Form.Item label={t('taxes.default')}>
+                <Switch checked={!!value} onChange={onChange} />
+              </Form.Item>
+            )}
+          />
           {editing && (
-            <Form.Item name="isActive" label={t('common.status')} valuePropName="checked">
-              <Switch />
-            </Form.Item>
+            <Controller
+              name="isActive"
+              control={control}
+              render={({ field: { value, onChange } }) => (
+                <Form.Item label={t('common.status')}>
+                  <Switch checked={!!value} onChange={onChange} />
+                </Form.Item>
+              )}
+            />
           )}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
             <Button onClick={() => setModalOpen(false)}>{t('common.cancel')}</Button>
             <Button type="primary" htmlType="submit" loading={saving}>
               {t('common.save')}
             </Button>
           </div>
-        </Form>
+        </form>
       </Modal>
-    </>
+    </div>
   );
 }

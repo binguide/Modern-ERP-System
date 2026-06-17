@@ -22,6 +22,10 @@ import { FinanceModule } from './modules/finance/finance.module';
 import { TaxesModule } from './modules/taxes/taxes.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { SalesModule } from './modules/sales/sales.module';
+import { PurchasesModule } from './modules/purchases/purchases.module';
+import { FixedAssetsModule } from './modules/fixed-assets/fixed-assets.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { SeedService } from './database/seed.service';
 
 @Module({
@@ -89,6 +93,10 @@ import { SeedService } from './database/seed.service';
     TaxesModule,
     InventoryModule,
     UploadModule,
+    SalesModule,
+    PurchasesModule,
+    FixedAssetsModule,
+    DashboardModule,
     HealthModule,
   ],
   providers: [
